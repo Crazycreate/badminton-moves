@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>羽球动作库</title>
+<style>
+  :root{
+    --bg:#F6F8F6; --surface:#FFFFFF; --ink:#1A231E; --ink-2:#48544D; --ink-3:#71807A;
+    --line:#DCE3DE; --accent:#1E7A5F; --accent-ink:#14614A; --accent-soft:#E4F0EA;
+    --cork:#A8482C; --cork-soft:#F6E9E2; --amber:#9A6B12; --amber-soft:#F5EDDC;
+    --court:#EAF1EC; --court-line:#FFFFFF; --on-accent:#FFFFFF; --shadow:0 4px 18px rgba(20,40,30,.08);
+    --serif:"Noto Serif SC","Songti SC","STSong","SimSun",serif;
+    --sans:"PingFang SC","Noto Sans SC","Microsoft YaHei",system-ui,sans-serif;
+    --mono:ui-monospace,"SF Mono",Consolas,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#111814; --surface:#18211C; --ink:#E7EEE9; --ink-2:#ADBBB2; --ink-3:#7E8C84;
+      --line:#2A352F; --accent:#3FAE8B; --accent-ink:#63C4A5; --accent-soft:#1C2F27;
+      --cork:#D07A5C; --cork-soft:#33221B; --amber:#D8A94E; --amber-soft:#2E2717;
+      --court:#16211B; --court-line:#3A4A41; --on-accent:#0E1512; --shadow:0 4px 18px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#111814; --surface:#18211C; --ink:#E7EEE9; --ink-2:#ADBBB2; --ink-3:#7E8C84;
+    --line:#2A352F; --accent:#3FAE8B; --accent-ink:#63C4A5; --accent-soft:#1C2F27;
+    --cork:#D07A5C; --cork-soft:#33221B; --amber:#D8A94E; --amber-soft:#2E2717;
+    --court:#16211B; --court-line:#3A4A41; --on-accent:#0E1512; --shadow:0 4px 18px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--sans); line-height:1.75}
+  .wrap{max-width:1060px; margin:0 auto; padding:0 20px 80px}
+  button{font-family:inherit}
+
+  header{padding:48px 0 8px}
+  .eyebrow{font-size:12px; letter-spacing:.3em; color:var(--accent-ink); font-weight:600; margin:0 0 10px}
+  h1{font-family:var(--serif); font-weight:900; font-size:clamp(34px,6vw,50px); margin:0; letter-spacing:.05em}
+  .sub{color:var(--ink-2); margin:10px 0 0; max-width:44em}
+  .courtline{margin:26px 0 22px; border-top:3px solid var(--accent); border-bottom:1px solid var(--line); height:6px}
+
+  .toolbar{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:26px}
+  .chip{
+    border:1px solid var(--line); background:var(--surface); color:var(--ink-2);
+    padding:6px 15px; border-radius:999px; font-size:14px; cursor:pointer;
+  }
+  .chip:hover{border-color:var(--accent); color:var(--accent-ink)}
+  .chip.on{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
+  #q{
+    margin-left:auto; padding:7px 14px; border:1px solid var(--line); border-radius:8px;
+    background:var(--surface); color:var(--ink); font-size:14px; min-width:180px;
+  }
+  #q:focus{outline:2px solid var(--accent); outline-offset:1px}
+  @media (max-width:640px){ #q{margin-left:0; width:100%} }
+
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:16px}
+  .card{
+    background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:16px;
+    cursor:pointer; text-align:left; display:flex; flex-direction:column; gap:10px;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .card:hover{transform:translateY(-3px); box-shadow:var(--shadow); border-color:var(--accent)}
+  .card:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+  .thumb{background:var(--court); border-radius:8px; padding:6px; display:flex; justify-content:center}
+  .thumb svg{display:block; width:100%; height:auto; max-height:120px}
+  .card h3{margin:0; font-family:var(--serif); font-size:18px; font-weight:800}
+  .card .en{font-size:12px; color:var(--ink-3); font-family:var(--mono); margin-top:2px}
+  .card p{margin:0; font-size:13.5px; color:var(--ink-2); line-height:1.65;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
+  .tags{display:flex; gap:6px; align-items:center; flex-wrap:wrap}
+  .tag{font-size:11.5px; padding:2px 9px; border-radius:999px; background:var(--accent-soft); color:var(--accent-ink); font-weight:600}
+  .tag.d入门{background:var(--accent-soft); color:var(--accent-ink)}
+  .tag.d进阶{background:var(--amber-soft); color:var(--amber)}
+  .tag.d高级{background:var(--cork-soft); color:var(--cork)}
+  .empty{color:var(--ink-3); padding:40px 0; text-align:center}
+
+  /* ---------- modal ---------- */
+  #overlay{
+    position:fixed; inset:0; background:rgba(10,20,15,.55); display:none;
+    align-items:flex-start; justify-content:center; padding:4vh 16px; overflow-y:auto; z-index:50;
+  }
+  #overlay.open{display:flex}
+  .sheet{
+    background:var(--bg); border:1px solid var(--line); border-radius:14px; max-width:860px; width:100%;
+    padding:26px 28px 34px; position:relative; box-shadow:var(--shadow); margin-bottom:6vh;
+  }
+  #close{
+    position:absolute; top:14px; right:14px; border:1px solid var(--line); background:var(--surface);
+    color:var(--ink-2); border-radius:8px; width:34px; height:34px; font-size:17px; cursor:pointer;
+  }
+  #close:hover{color:var(--cork); border-color:var(--cork)}
+  .sheet .cat{font-size:12px; letter-spacing:.2em; color:var(--accent-ink); font-weight:700}
+  .sheet h2{font-family:var(--serif); font-weight:900; font-size:clamp(24px,4vw,32px); margin:6px 0 2px}
+  .sheet .en{font-family:var(--mono); font-size:13px; color:var(--ink-3)}
+  .sheet .summary{color:var(--ink-2); margin:12px 0 18px; max-width:44em}
+
+  .player{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px}
+  .stage{background:var(--court); border-radius:8px; padding:6px; display:flex; justify-content:center}
+  .stage svg{display:block; width:100%; height:auto; max-height:440px}
+  .caption{
+    margin-top:10px; text-align:center; font-size:15px; font-weight:700; min-height:1.8em;
+    color:var(--accent-ink);
+  }
+  .controls{display:flex; gap:8px; justify-content:center; margin-top:8px}
+  .ctl{border:1px solid var(--line); background:var(--surface); color:var(--ink-2);
+    border-radius:8px; padding:5px 16px; font-size:13.5px; cursor:pointer}
+  .ctl:hover{border-color:var(--accent); color:var(--accent-ink)}
+  .phases{display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-top:12px}
+  .ph{font-size:12.5px; padding:3px 10px; border-radius:999px; background:var(--bg);
+    border:1px solid var(--line); color:var(--ink-3)}
+  .ph.on{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
+  .tabs{display:flex; gap:8px; justify-content:center; margin:0 0 12px}
+  .fseg{stroke:var(--ink-2)} .fseg.dim{opacity:.45}
+  .frk{stroke:var(--accent-ink)}
+  .fignote{text-align:center; color:var(--ink-3); font-size:13px; margin:6px 0 0}
+
+  /* chain engine */
+  .chainbox{display:flex; flex-wrap:wrap; gap:0; justify-content:center; padding:26px 6px 10px}
+  .cnode{display:flex; align-items:center}
+  .cdot{
+    width:66px; height:66px; border-radius:50%; border:2px solid var(--line); background:var(--surface);
+    display:flex; align-items:center; justify-content:center; text-align:center;
+    font-size:13px; font-weight:700; color:var(--ink-2); line-height:1.25; padding:4px;
+    transition:all .25s ease;
+  }
+  .cnode.on .cdot{border-color:var(--accent); background:var(--accent-soft); color:var(--accent-ink);
+    transform:scale(1.16); box-shadow:0 0 0 5px color-mix(in srgb, var(--accent) 18%, transparent)}
+  .cnode.hit.on .cdot{border-color:var(--cork); background:var(--cork-soft); color:var(--cork)}
+  .clink{width:26px; height:2px; background:var(--line)}
+  .cnode.done .cdot{border-color:var(--accent)}
+  .cnode.done + .cnode .clink,.cnode.on .clink{background:var(--accent)}
+  @media (max-width:560px){ .cdot{width:56px;height:56px;font-size:12px} .clink{width:14px} }
+
+  .detail{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:18px}
+  @media (max-width:680px){.detail{grid-template-columns:1fr}}
+  .panel{background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:14px 18px}
+  .panel h4{margin:0 0 8px; font-size:14px; color:var(--accent-ink); letter-spacing:.06em}
+  .panel.warn h4{color:var(--cork)}
+  .panel ul{margin:0; padding-left:1.3em}
+  .panel li{margin:6px 0; font-size:14px; color:var(--ink-2)}
+  .panel li::marker{color:var(--accent-ink)}
+  .panel.warn li::marker{color:var(--cork)}
+  .rel{margin-top:14px; font-size:13.5px; color:var(--ink-3)}
+  .rel a{color:var(--accent-ink); cursor:pointer; text-decoration:underline; margin-right:10px}
+  footer{margin-top:56px; color:var(--ink-3); font-size:13px}
+  @media (prefers-reduced-motion: reduce){ .card{transition:none} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="eyebrow">步伐 · 启动 · 发力 · 防守</p>
+    <h1>羽球动作库</h1>
+    <p class="sub">数据驱动的羽毛球动作解析：每个动作一条结构化记录（要点 / 常见错误 / 训练法），配一段自绘动画——球场俯视步伐、发力链时序、垫步时机轴、防守覆盖区。点击卡片查看。</p>
+    <div class="courtline"></div>
+  </header>
+
+  <div class="toolbar" id="cats"></div>
+  <div class="grid" id="grid"></div>
+  <p class="empty" id="empty" hidden>没有匹配的动作</p>
+
+  <footer><p>数据层：<span style="font-family:var(--mono)">data/moves.json</span> · 结构参考 exercises-dataset 模式 · 动画为自绘示意，坐标基于标准单打场地（厘米）</p></footer>
+</div>
+
+<div id="overlay" role="dialog" aria-modal="true">
+  <div class="sheet">
+    <button id="close" aria-label="关闭">✕</button>
+    <div id="sheetBody"></div>
+  </div>
+</div>
+
+<script src="data/moves.js"></script>
+<script>
+(function(){
+"use strict";
+const MOVES = window.BADMINTON_MOVES || [];
+const CATS = ["全部","步伐","手法","双打","启动与重心","发力技巧","防守"];
+const TABNAME = {figure:"侧视姿态",chain:"发力链",footwork:"球场俯视",timing:"时机轴",stance:"站位",trajectory:"弧线视图"};
+let curCat = "全部", curQ = "", runner = null;
+
+/* ---------------- court svg ---------------- */
+const C = { W:610, NET:0, TOP:-120, BASE:670, SSL:198, LSL:594, S1:46, S2:564, MID:305 };
+function courtSvg(inner, mini){
+  const sw = mini ? 6 : 3, swn = mini ? 8 : 5;
+  return `<svg viewBox="-18 -132 646 828" ${mini?'aria-hidden="true"':''}>
+    <rect x="0" y="${C.TOP}" width="${C.W}" height="120" fill="currentColor" opacity=".05"/>
+    <rect x="0" y="0" width="${C.W}" height="${C.BASE}" fill="none" stroke="var(--court-line)" stroke-width="${sw}"/>
+    <line x1="${C.S1}" y1="0" x2="${C.S1}" y2="${C.BASE}" stroke="var(--court-line)" stroke-width="${sw}"/>
+    <line x1="${C.S2}" y1="0" x2="${C.S2}" y2="${C.BASE}" stroke="var(--court-line)" stroke-width="${sw}"/>
+    <line x1="0" y1="${C.SSL}" x2="${C.W}" y2="${C.SSL}" stroke="var(--court-line)" stroke-width="${sw}"/>
+    <line x1="0" y1="${C.LSL}" x2="${C.W}" y2="${C.LSL}" stroke="var(--court-line)" stroke-width="${sw}"/>
+    <line x1="${C.MID}" y1="${C.SSL}" x2="${C.MID}" y2="${C.BASE}" stroke="var(--court-line)" stroke-width="${sw}"/>
+    <line x1="-14" y1="0" x2="${C.W+14}" y2="0" stroke="var(--ink-3)" stroke-width="${swn}" opacity=".8"/>
+    ${mini?'':'<text x="'+(C.W/2)+'" y="-96" text-anchor="middle" font-size="26" fill="var(--ink-3)" opacity=".8">对手半场</text>'}
+    ${inner}
+  </svg>`;
+}
+const lerp=(a,b,t)=>a+(b-a)*t;
+const eases={ inout:t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2, out:t=>1-Math.pow(1-t,3) };
+const easeFor=k=>(k==="lunge"||k==="jump"||k==="brake")?eases.out:eases.inout;
+
+/* ---------------- thumbnails ---------------- */
+function thumb(m){
+  const a=m.anim;
+  if(a.type==="footwork"){
+    const pts=a.phases.map(p=>p.pos.join(",")).join(" ");
+    const dots=a.phases.map(p=>`<circle cx="${p.pos[0]}" cy="${p.pos[1]}" r="13" fill="var(--accent)" opacity=".55"/>`).join("");
+    return courtSvg(`<polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="9" stroke-dasharray="20 14" opacity=".8"/>${dots}
+      <circle cx="${a.phases[0].pos[0]}" cy="${a.phases[0].pos[1]}" r="20" fill="var(--accent)"/>
+      ${a.phases2?`<circle cx="${a.phases2[0].pos[0]}" cy="${a.phases2[0].pos[1]}" r="19" fill="var(--court)" stroke="var(--ink-2)" stroke-width="7"/>`:""}`, true);
+  }
+  if(a.type==="trajectory"){
+    const paths=a.arcs.map(arc=>{
+      const pts=trjPts(arc).map(p=>p[0].toFixed(0)+","+p[1].toFixed(0)).join(" ");
+      const col=TRJCOLOR[arc.kind||"main"];
+      return `<polyline points="${pts}" fill="none" stroke="${col}" stroke-width="8" opacity=".75"
+        ${arc.kind&&arc.kind!=="main"?'stroke-dasharray="16 16"':''}/>`;}).join("");
+    return trjCourt(paths,a.arcs[0].from[0]);
+  }
+  if(a.type==="figure"){
+    const f=a.frames.find(x=>x.hit)||a.frames[a.frames.length-1], g=computeFig(f.pose);
+    const sg=(p,q,w,c)=>`<line x1="${p[0]}" y1="${p[1]}" x2="${q[0]}" y2="${q[1]}" stroke="${c||'var(--ink-2)'}" stroke-width="${w}" stroke-linecap="round"/>`;
+    return `<svg viewBox="150 50 390 460" aria-hidden="true">
+      <line x1="160" y1="486" x2="530" y2="486" stroke="var(--line)" stroke-width="4"/>
+      ${sg(g.rt,g.fk,10)}${sg(g.fk,g.fn,10)}${sg(g.rt,g.bk,10)}${sg(g.bk,g.bn,10)}
+      ${sg(g.rt,g.sh,12)}<circle cx="${g.hd[0]}" cy="${g.hd[1]}" r="15" fill="none" stroke="var(--ink-2)" stroke-width="8"/>
+      ${sg(g.sh,g.el,10,'var(--accent)')}${sg(g.el,g.wr,10,'var(--accent)')}${sg(g.wr,g.tp,5,'var(--accent-ink)')}
+      <ellipse cx="${g.tp[0]}" cy="${g.tp[1]}" rx="13" ry="19" fill="none" stroke="var(--accent-ink)" stroke-width="5"
+        transform="rotate(${(f.pose.racket||0)+90} ${g.tp[0]} ${g.tp[1]})"/></svg>`;
+  }
+  if(a.type==="chain"){
+    const n=a.nodes.length, xs=i=>60+i*(500/(n-1));
+    return `<svg viewBox="0 0 620 120" aria-hidden="true"><line x1="60" y1="60" x2="560" y2="60" stroke="var(--line)" stroke-width="6"/>
+      ${a.nodes.map((_,i)=>`<circle cx="${xs(i)}" cy="60" r="${i===n-1?22:16}" fill="${i===n-1?'var(--cork)':'var(--accent)'}" opacity="${.45+.55*i/(n-1)}"/>`).join("")}</svg>`;
+  }
+  if(a.type==="timing"){
+    return `<svg viewBox="0 0 620 160" aria-hidden="true">
+      <path d="M40 90 L200 90 Q250 60 300 72 Q330 82 330 112 L360 96 L560 96" fill="none" stroke="var(--accent)" stroke-width="8"/>
+      <line x1="330" y1="30" x2="330" y2="130" stroke="var(--cork)" stroke-width="6" stroke-dasharray="10 8"/>
+      <circle cx="330" cy="112" r="16" fill="var(--accent)"/></svg>`;
+  }
+  const zones=(a.zones||[]).map(z=>`<rect x="${z.from[0]}" y="${z.from[1]}" width="${z.to[0]-z.from[0]}" height="${z.to[1]-z.from[1]}" rx="18" fill="var(--accent)" opacity=".28"/>`).join("");
+  return courtSvg(zones+`<circle cx="${a.player[0]}" cy="${a.player[1]}" r="22" fill="var(--accent)"/>`, true);
+}
+
+/* ---------------- grid ---------------- */
+function renderCats(){
+  document.getElementById("cats").innerHTML =
+    CATS.map(c=>`<button class="chip ${c===curCat?'on':''}" data-c="${c}">${c}</button>`).join("") +
+    `<input id="q" type="search" placeholder="搜索动作 / 要点…" value="${curQ}">`;
+  document.querySelectorAll("#cats .chip").forEach(b=>b.onclick=()=>{curCat=b.dataset.c; renderCats(); renderGrid();});
+  const q=document.getElementById("q");
+  q.oninput=()=>{curQ=q.value.trim(); renderGrid();};
+}
+function match(m){
+  if(curCat!=="全部" && m.category!==curCat) return false;
+  if(!curQ) return true;
+  const hay=(m.name_zh+m.name_en+m.summary+m.key_points.join(" ")).toLowerCase();
+  return hay.includes(curQ.toLowerCase());
+}
+function renderGrid(){
+  const list=MOVES.filter(match);
+  document.getElementById("empty").hidden = list.length>0;
+  document.getElementById("grid").innerHTML=list.map(m=>`
+    <button class="card" data-id="${m.id}">
+      <div class="thumb">${thumb(m)}</div>
+      <div><h3>${m.name_zh}</h3><div class="en">${m.id} · ${m.name_en}</div></div>
+      <div class="tags"><span class="tag">${m.category}</span><span class="tag d${m.difficulty}">${m.difficulty}</span></div>
+      <p>${m.summary}</p>
+    </button>`).join("");
+  document.querySelectorAll(".card").forEach(c=>c.onclick=()=>openMove(c.dataset.id));
+}
+
+/* ---------------- players ---------------- */
+function stopRunner(){ if(runner){ runner.stop(); runner=null; } }
+
+function footworkPlayer(host, anim){
+  const ph=anim.phases;
+  host.innerHTML=`<div class="stage">${courtSvg(`
+      <g id="anTrail"></g><g id="anFp"></g>
+      <g id="anShots"></g>
+      ${anim.phases2?'<g id="anP2"><circle r="17" fill="var(--bg)" stroke="var(--ink-2)" stroke-width="5"/><circle r="6" fill="var(--ink-2)"/></g>':''}
+      <g id="anP"><circle id="anRing" r="26" fill="none" stroke="var(--accent)" stroke-width="5" opacity="0"/>
+        <circle r="17" fill="var(--accent)"/><circle r="7" fill="var(--bg)"/></g>`)}</div>
+    <div class="caption" id="anCap"></div>
+    ${anim.phases2?'<p class="fignote">实心 = 你 · 空心 = 搭档（同步移动）</p>':''}
+    <div class="controls"><button class="ctl" id="anPlay">暂停</button><button class="ctl" id="anSlow">慢速</button></div>
+    <div class="phases">${ph.map((p,i)=>`<span class="ph" data-i="${i}">${i+1}. ${p.label}</span>`).join("")}</div>`;
+  const $=id=>host.querySelector(id);
+  const P=$("#anP"), P2=$("#anP2"), ring=$("#anRing"), trail=$("#anTrail"), fp=$("#anFp"),
+        shotsG=$("#anShots"), cap=$("#anCap"), NS="http://www.w3.org/2000/svg";
+  const shots=anim.shuttle?(Array.isArray(anim.shuttle)?anim.shuttle:[anim.shuttle]):[];
+  let i=0,t0=null,playing=true,speed=1,raf=0,shotEls=[],shotState=[];
+  function seg(a,b,kind){
+    const s=document.createElementNS("http://www.w3.org/2000/svg","line");
+    s.setAttribute("x1",a[0]);s.setAttribute("y1",a[1]);s.setAttribute("x2",b[0]);s.setAttribute("y2",b[1]);
+    s.setAttribute("stroke",kind==="brake"?"var(--cork)":"var(--accent)");
+    s.setAttribute("stroke-width",kind==="recover"?5:8);
+    if(kind==="recover")s.setAttribute("stroke-dasharray","14 12");
+    s.setAttribute("opacity",".55"); trail.appendChild(s);
+  }
+  function foot(p){
+    const c=document.createElementNS("http://www.w3.org/2000/svg","circle");
+    c.setAttribute("cx",p[0]);c.setAttribute("cy",p[1]);c.setAttribute("r",11);
+    c.setAttribute("fill","var(--accent)");c.setAttribute("opacity",".4"); fp.appendChild(c);
+  }
+  function reset(){ i=0;t0=null;trail.innerHTML="";fp.innerHTML="";
+    shotsG.innerHTML="";shotEls=shots.map(()=>{const g=document.createElementNS(NS,"g");g.setAttribute("opacity","0");
+      const l=document.createElementNS(NS,"line");l.setAttribute("stroke","var(--cork)");l.setAttribute("stroke-width","6");l.setAttribute("stroke-dasharray","16 12");
+      const c=document.createElementNS(NS,"circle");c.setAttribute("r","13");c.setAttribute("fill","var(--cork)");
+      g.appendChild(l);g.appendChild(c);shotsG.appendChild(g);return{g,l,c};});
+    shotState=shots.map(()=>0); }
+  function setCap(k){ cap.textContent=`${k+1} / ${ph.length} · ${ph[k].label}`;
+    host.querySelectorAll(".ph").forEach(e=>e.classList.toggle("on",+e.dataset.i===k)); }
+  function shuttleTick(now,phStart){
+    shots.forEach((s,k)=>{ if(s.at!==i||shotState[k]===2)return;
+      const d=Math.min(1,(now-phStart)/450), e=shotEls[k],
+            x=lerp(s.from[0],s.to[0],eases.out(d)), y=lerp(s.from[1],s.to[1],eases.out(d));
+      e.g.setAttribute("opacity","1");
+      e.l.setAttribute("x1",s.from[0]);e.l.setAttribute("y1",s.from[1]);e.l.setAttribute("x2",x);e.l.setAttribute("y2",y);
+      e.c.setAttribute("cx",x);e.c.setAttribute("cy",y);
+      if(d>=1){shotState[k]=2;e.g.setAttribute("opacity",".45");} });
+  }
+  function frame(now){
+    if(!playing){raf=requestAnimationFrame(frame);return;}
+    if(t0===null){t0=now;setCap(i);}
+    const cur=ph[i], prev=ph[(i-1+ph.length)%ph.length], from=i===0?ph[0].pos:prev.pos;
+    const dur=cur.dur/speed, t=Math.min(1,(now-t0)/dur), e=easeFor(cur.kind)(t);
+    const x=lerp(from[0],cur.pos[0],e), y=lerp(from[1],cur.pos[1],e);
+    let sc=1; if(cur.kind==="jump")sc=1+0.3*Math.sin(Math.PI*t);
+    P.setAttribute("transform",`translate(${x},${y}) scale(${sc})`);
+    if(P2&&anim.phases2){const c2=anim.phases2[Math.min(i,anim.phases2.length-1)],
+      f2=i===0?anim.phases2[0].pos:(anim.phases2[i-1]||c2).pos, e2=easeFor(c2.kind||"step")(t);
+      P2.setAttribute("transform",`translate(${lerp(f2[0],c2.pos[0],e2)},${lerp(f2[1],c2.pos[1],e2)})`);}
+    ring.setAttribute("opacity",(cur.kind==="split"||cur.kind==="hold")?String(.9*Math.abs(Math.sin(now/180))):"0");
+    shuttleTick(now,t0);
+    if(t>=1){
+      if(cur.pos!==from){seg(from,cur.pos,cur.kind);foot(cur.pos);}
+      i++;t0=null;
+      if(i>=ph.length){ playing=false; setTimeout(()=>{reset();playing=true;},900/speed); i=0; }
+    }
+    raf=requestAnimationFrame(frame);
+  }
+  $("#anPlay").onclick=function(){playing=!playing;this.textContent=playing?"暂停":"播放";};
+  $("#anSlow").onclick=function(){speed=speed===1?0.5:1;this.textContent=speed===1?"慢速":"常速";};
+  reset(); raf=requestAnimationFrame(frame);
+  return {stop:()=>cancelAnimationFrame(raf)};
+}
+
+function chainPlayer(host,anim){
+  const n=anim.nodes;
+  host.innerHTML=`<div class="chainbox">${n.map((d,i)=>`
+      <div class="cnode ${d.hit?'hit':''}" data-i="${i}">${i>0?'<span class="clink"></span>':''}<span class="cdot">${d.t}</span></div>`).join("")}</div>
+    <div class="caption" id="anCap"></div>
+    <p style="text-align:center;color:var(--ink-3);font-size:13px;margin:6px 0 0">${anim.note||""}</p>
+    <div class="controls"><button class="ctl" id="anPlay">暂停</button></div>`;
+  const nodes=[...host.querySelectorAll(".cnode")], cap=host.querySelector("#anCap");
+  let i=-1,playing=true;
+  const tick=()=>{ if(!playing)return;
+    i++;
+    if(i>=n.length){ nodes.forEach(e=>e.classList.remove("on","done")); i=-1; cap.textContent="……重新开始"; return; }
+    nodes.forEach((e,k)=>{e.classList.toggle("on",k===i); e.classList.toggle("done",k<i);});
+    cap.textContent=`${n[i].t} —— ${n[i].d}`;
+  };
+  const timer=setInterval(tick,950); tick();
+  host.querySelector("#anPlay").onclick=function(){playing=!playing;this.textContent=playing?"暂停":"播放";};
+  return {stop:()=>clearInterval(timer)};
+}
+
+function timingPlayer(host,anim){
+  const W=620,H=230,X0=50,X1=570,Y=150;
+  const pts=[]; // CoG height curve
+  for(let k=0;k<=200;k++){ const t=k/200; let y;
+    if(t<0.3)y=112; else if(t<0.45)y=112-16*Math.sin(Math.PI*(t-0.3)/0.3);
+    else if(t<0.52)y=96+26*((t-0.45)/0.07); else if(t<0.62)y=122-10*((t-0.52)/0.10);
+    else y=112; pts.push([X0+(X1-X0)*t,y]); }
+  const poly=pts.map(p=>p.join(",")).join(" ");
+  const evs=anim.events.map((e,idx)=>{ const x=X0+(X1-X0)*e.t, up=idx%2===0;
+    return `<line x1="${x}" y1="40" x2="${x}" y2="${Y}" stroke="${e.hit?'var(--cork)':'var(--line)'}" stroke-width="${e.hit?4:2}" ${e.hit?'':'stroke-dasharray="6 6"'}/>
+      <text x="${x}" y="${up?30:Y+26}" text-anchor="middle" font-size="15" font-weight="700" fill="${e.hit?'var(--cork)':'var(--ink-2)'}">${e.label}</text>`;}).join("");
+  host.innerHTML=`<div class="stage" style="background:var(--surface)"><svg viewBox="0 0 ${W} ${H}">
+      <line x1="${X0}" y1="${Y}" x2="${X1}" y2="${Y}" stroke="var(--line)" stroke-width="2"/>
+      ${evs}
+      <polyline points="${poly}" fill="none" stroke="var(--accent)" stroke-width="5"/>
+      <circle id="tmDot" r="11" fill="var(--accent)"/>
+      <line id="tmHead" y1="40" y2="${Y}" stroke="var(--accent-ink)" stroke-width="2" opacity=".6"/>
+      <text x="${X0}" y="${Y+26}" font-size="13" fill="var(--ink-3)">重心高度 →</text>
+    </svg></div>
+    <div class="caption" id="anCap"></div>
+    <p style="text-align:center;color:var(--ink-3);font-size:13px;margin:6px 0 0">${anim.note||""}</p>
+    <div class="controls"><button class="ctl" id="anPlay">暂停</button></div>`;
+  const dot=host.querySelector("#tmDot"), head=host.querySelector("#tmHead"), cap=host.querySelector("#anCap");
+  let start=null,playing=true,raf=0; const DUR=3000;
+  function frame(now){
+    if(playing){
+      if(start===null)start=now;
+      let t=((now-start)%(DUR+800))/DUR; if(t>1)t=1;
+      const p=pts[Math.round(t*200)];
+      dot.setAttribute("cx",p[0]);dot.setAttribute("cy",p[1]);
+      head.setAttribute("x1",p[0]);head.setAttribute("x2",p[0]);
+      let lab=""; for(const e of anim.events){ if(t>=e.t-0.02) lab=e.label; }
+      cap.textContent=lab||"待机 · 放松";
+    }
+    raf=requestAnimationFrame(frame);
+  }
+  host.querySelector("#anPlay").onclick=function(){playing=!playing;this.textContent=playing?"暂停":"播放";};
+  raf=requestAnimationFrame(frame);
+  return {stop:()=>cancelAnimationFrame(raf)};
+}
+
+function stancePlayer(host,anim){
+  const zones=anim.zones.map((z,i)=>`
+    <g class="zone" data-i="${i}">
+      <rect x="${z.from[0]}" y="${z.from[1]}" width="${z.to[0]-z.from[0]}" height="${z.to[1]-z.from[1]}" rx="20"
+        fill="var(--accent)" opacity=".18"/>
+      <text x="${(z.from[0]+z.to[0])/2}" y="${(z.from[1]+z.to[1])/2}" text-anchor="middle" font-size="24" font-weight="700" fill="var(--accent-ink)">${z.label}</text>
+    </g>`).join("");
+  host.innerHTML=`<div class="stage">${courtSvg(zones+`
+      <ellipse cx="${anim.player[0]}" cy="${anim.player[1]}" rx="30" ry="20" fill="var(--accent)"/>
+      <line x1="${anim.player[0]}" y1="${anim.player[1]-18}" x2="${anim.player[0]}" y2="${anim.player[1]-52}" stroke="var(--accent)" stroke-width="7"/>`)}</div>
+    <div class="caption" id="anCap">${anim.note||""}</div>`;
+  const gs=[...host.querySelectorAll(".zone rect")]; let i=0;
+  const timer=setInterval(()=>{ gs.forEach((r,k)=>r.setAttribute("opacity",k===i?".5":".14"));
+    host.querySelector("#anCap").textContent=anim.zones[i].label+" —— "+(anim.note||"");
+    i=(i+1)%gs.length; },1300);
+  return {stop:()=>clearInterval(timer)};
+}
+
+/* ---- figure engine: side-view stick figure (angles: 0=右/背侧, 90=下, 180=左/网侧, -90=上) ---- */
+const FIG={torso:95,neck:13,headR:15,ua:62,fa:58,rk:64,th:78,sh:74,ft:26,oua:54,ofa:50,rootX:330,rootY:318,ground:486};
+const extPt=(p,a,l)=>{const r=a*Math.PI/180;return[p[0]+Math.cos(r)*l,p[1]+Math.sin(r)*l];};
+function computeFig(P){
+  const rt=[FIG.rootX+(P.rootX||0),FIG.rootY+(P.rootY||0)];
+  const sh=extPt(rt,P.torso,FIG.torso), hd=extPt(sh,P.torso,FIG.neck+FIG.headR);
+  const el=extPt(sh,P.upperArm,FIG.ua), wr=extPt(el,P.foreArm,FIG.fa), tp=extPt(wr,P.racket,FIG.rk);
+  const oe=extPt(sh,P.otherUpper==null?115:P.otherUpper,FIG.oua), ow=extPt(oe,P.otherFore==null?100:P.otherFore,FIG.ofa);
+  const fk=extPt(rt,P.frontThigh,FIG.th), fn=extPt(fk,P.frontShin,FIG.sh), ffp=extPt(fn,P.frontFoot==null?180:P.frontFoot,FIG.ft);
+  const bk=extPt(rt,P.backThigh,FIG.th), bn=extPt(bk,P.backShin,FIG.sh), bfp=extPt(bn,P.backFoot==null?0:P.backFoot,FIG.ft);
+  return{rt,sh,hd,el,wr,tp,oe,ow,fk,fn,ffp,bk,bn,bfp};
+}
+function lerpPose(A,B,t){const o={};for(const k of new Set([...Object.keys(A),...Object.keys(B)])){
+  const a=A[k]==null?B[k]:A[k], b=B[k]==null?A[k]:B[k];
+  o[k]=(typeof a==="number"&&typeof b==="number")?lerp(a,b,t):b;}return o;}
+function figurePlayer(host,anim){
+  const fr=anim.frames;
+  const L=(id,w,cls)=>`<line id="fg-${id}" stroke-linecap="round" stroke-width="${w}" class="${cls||"fseg"}"/>`;
+  host.innerHTML=`<div class="stage"><svg viewBox="30 40 590 470">
+      <line x1="40" y1="${FIG.ground}" x2="610" y2="${FIG.ground}" stroke="var(--line)" stroke-width="3"/>
+      <line x1="72" y1="${FIG.ground}" x2="72" y2="${FIG.ground-168}" stroke="var(--ink-3)" stroke-width="4" opacity=".55"/>
+      <text x="72" y="${FIG.ground-178}" text-anchor="middle" font-size="19" fill="var(--ink-3)">网</text>
+      <polyline id="fg-trail" fill="none" stroke="var(--accent)" stroke-width="4" opacity=".4"/>
+      ${L("oua",8,"fseg dim")}${L("ofa",8,"fseg dim")}
+      ${L("bth",11)}${L("bsh",11)}${L("bft",9)}${L("fth",11)}${L("fsh",11)}${L("fft",9)}
+      ${L("tor",13)}<circle id="fg-head" r="${FIG.headR}" fill="none" stroke="var(--ink-2)" stroke-width="9"/>
+      ${L("ua",11)}${L("fa",11)}${L("rksh",5,"frk")}
+      <ellipse id="fg-rkhd" fill="none" class="frk" stroke-width="5" ry="22"/>
+      <g id="fg-spin" opacity="0"><path d="M -24 8 A 25 25 0 1 1 20 14" fill="none" stroke="var(--cork)" stroke-width="4"/>
+        <path d="M 20 14 l 12 -4 l -5 12 z" fill="var(--cork)"/><text id="fg-spinT" x="34" y="-8" font-size="19" font-weight="700" fill="var(--cork)"></text></g>
+      <circle id="fg-hit" r="10" fill="none" stroke="var(--cork)" stroke-width="5" opacity="0"/>
+      <circle id="fg-shu" r="8" fill="var(--cork)" opacity="0"/>
+    </svg></div>
+    <div class="caption" id="anCap"></div>
+    <p class="fignote">${anim.note||""}</p>
+    <div class="controls"><button class="ctl" id="anPlay">暂停</button><button class="ctl" id="anSlow">慢速</button></div>
+    <div class="phases">${fr.map((p,i)=>`<span class="ph" data-i="${i}">${i+1}. ${p.label}</span>`).join("")}</div>`;
+  const $=s=>host.querySelector(s), gid=id=>$("#fg-"+id);
+  const segs={oua:gid("oua"),ofa:gid("ofa"),bth:gid("bth"),bsh:gid("bsh"),bft:gid("bft"),fth:gid("fth"),fsh:gid("fsh"),fft:gid("fft"),tor:gid("tor"),ua:gid("ua"),fa:gid("fa"),rksh:gid("rksh")};
+  const rkhd=gid("rkhd"),head=gid("head"),spin=gid("spin"),spinT=gid("spinT"),hitC=gid("hit"),shu=gid("shu"),trail=gid("trail"),cap=$("#anCap");
+  const FOCUS={upperArm:["ua"],foreArm:["fa"],racket:["rksh"],torso:["tor"],legs:["fth","fsh","bth","bsh"]};
+  const setL=(e,a,b)=>{e.setAttribute("x1",a[0]);e.setAttribute("y1",a[1]);e.setAttribute("x2",b[0]);e.setAttribute("y2",b[1]);};
+  let i=0,t0=null,playing=true,speed=1,raf=0,hitT=null,tick=0;
+  function setCap(k){cap.textContent=`${k+1} / ${fr.length} · ${fr[k].label} —— ${fr[k].d}`;
+    host.querySelectorAll(".ph").forEach(e=>e.classList.toggle("on",+e.dataset.i===k));}
+  function frame(now){
+    if(!playing){raf=requestAnimationFrame(frame);return;}
+    if(t0===null){t0=now;setCap(i);if(i===0)trail.setAttribute("points","");}
+    const cur=fr[i],prev=fr[(i-1+fr.length)%fr.length],from=i===0?fr[0].pose:prev.pose;
+    const t=Math.min(1,(now-t0)/(cur.dur/speed)),P=lerpPose(from,cur.pose,eases.inout(t)),g=computeFig(P);
+    setL(segs.tor,g.rt,g.sh);setL(segs.ua,g.sh,g.el);setL(segs.fa,g.el,g.wr);setL(segs.rksh,g.wr,g.tp);
+    setL(segs.oua,g.sh,g.oe);setL(segs.ofa,g.oe,g.ow);
+    setL(segs.fth,g.rt,g.fk);setL(segs.fsh,g.fk,g.fn);setL(segs.fft,g.fn,g.ffp);
+    setL(segs.bth,g.rt,g.bk);setL(segs.bsh,g.bk,g.bn);setL(segs.bft,g.bn,g.bfp);
+    head.setAttribute("cx",g.hd[0]);head.setAttribute("cy",g.hd[1]);
+    const hc=extPt(g.wr,P.racket,FIG.rk+18);
+    rkhd.setAttribute("cx",hc[0]);rkhd.setAttribute("cy",hc[1]);
+    rkhd.setAttribute("rx",String(5+16*(P.face||0)));
+    rkhd.setAttribute("transform",`rotate(${(P.racket||0)+90} ${hc[0]} ${hc[1]})`);
+    const foc=new Set((cur.focus||[]).flatMap(f=>FOCUS[f]||[]));
+    for(const k in segs){const on=foc.has(k);segs[k].style.stroke=on?"var(--accent)":"";segs[k].style.strokeWidth=on?(k==="rksh"?"8":"15"):"";}
+    rkhd.style.stroke=foc.has("rksh")?"var(--accent)":"";
+    if(cur.spin&&t>.25){const m=[(g.el[0]+g.wr[0])/2,(g.el[1]+g.wr[1])/2];
+      spin.setAttribute("opacity",String(.5+.5*Math.abs(Math.sin(now/200))));
+      spin.setAttribute("transform",`translate(${m[0]},${m[1]})`);spinT.textContent=cur.spin==="out"?"外旋":"内旋";}
+    else spin.setAttribute("opacity","0");
+    if(hitT!==null){const q=Math.min(1,(now-hitT)/420);
+      hitC.setAttribute("cx",g.tp[0]);hitC.setAttribute("cy",g.tp[1]);hitC.setAttribute("r",String(10+34*q));hitC.setAttribute("opacity",String(1-q));
+      shu.setAttribute("cx",g.tp[0]);shu.setAttribute("cy",g.tp[1]);shu.setAttribute("opacity",String(1-q));
+      if(q>=1)hitT=null;}
+    else{hitC.setAttribute("opacity","0");shu.setAttribute("opacity","0");}
+    if((tick++%2)===0){const pts=trail.getAttribute("points")||"";const arr=pts?pts.split(" "):[];
+      arr.push(g.tp[0].toFixed(1)+","+g.tp[1].toFixed(1));if(arr.length>140)arr.shift();trail.setAttribute("points",arr.join(" "));}
+    if(t>=1){if(cur.hit)hitT=now;i++;t0=null;
+      if(i>=fr.length){playing=false;setTimeout(()=>{i=0;t0=null;playing=true;},1100/speed);}}
+    raf=requestAnimationFrame(frame);
+  }
+  $("#anPlay").onclick=function(){playing=!playing;this.textContent=playing?"暂停":"播放";};
+  $("#anSlow").onclick=function(){speed=speed===1?0.45:1;this.textContent=speed===1?"慢速":"常速";};
+  raf=requestAnimationFrame(frame);
+  return{stop:()=>cancelAnimationFrame(raf)};
+}
+
+/* ---- trajectory engine: side-view shuttle arcs over the full court (x 0–1340cm, net at 670; heights in cm) ---- */
+const TRJ={ground:730,sy:0.85,net:670};
+const trjY=h=>TRJ.ground-h*TRJ.sy;
+const TRJCOLOR={main:"var(--accent)",alt:"var(--accent-ink)",bad:"var(--cork)"};
+function trjPts(arc){
+  const P0=[arc.from[0],trjY(arc.from[1])],P2=[arc.to[0],trjY(arc.to[1])],A=[arc.apex[0],trjY(arc.apex[1])];
+  const C=[(4*A[0]-P0[0]-P2[0])/2,(4*A[1]-P0[1]-P2[1])/2],pts=[];
+  for(let k=0;k<=64;k++){const t=k/64,u=1-t;
+    pts.push([u*u*P0[0]+2*u*t*C[0]+t*t*P2[0],u*u*P0[1]+2*u*t*C[1]+t*t*P2[1]]);}
+  return pts;
+}
+function trjCourt(inner,px){
+  const g=TRJ.ground,nt=trjY(155);
+  return `<svg viewBox="0 130 1360 660">
+    <line x1="10" y1="${g}" x2="1350" y2="${g}" stroke="var(--court-line)" stroke-width="5"/>
+    ${[30,472,868,1310].map(x=>`<line x1="${x}" y1="${g}" x2="${x}" y2="${g-16}" stroke="var(--court-line)" stroke-width="4"/>`).join("")}
+    <line x1="${TRJ.net}" y1="${g}" x2="${TRJ.net}" y2="${nt}" stroke="var(--ink-3)" stroke-width="6"/>
+    <rect x="${TRJ.net-9}" y="${nt}" width="18" height="15" fill="var(--ink-3)"/>
+    <text x="330" y="${g+42}" text-anchor="middle" font-size="27" fill="var(--ink-3)">己方半场</text>
+    <text x="1010" y="${g+42}" text-anchor="middle" font-size="27" fill="var(--ink-3)">对方半场</text>
+    ${px?`<line x1="${px}" y1="${g}" x2="${px}" y2="${g-118}" stroke="var(--ink-2)" stroke-width="9" stroke-linecap="round"/>
+      <circle cx="${px}" cy="${g-138}" r="17" fill="none" stroke="var(--ink-2)" stroke-width="8"/>`:""}
+    ${inner}</svg>`;
+}
+function trajectoryPlayer(host,anim){
+  const arcs=anim.arcs, cache=arcs.map(trjPts);
+  host.innerHTML=`<div class="stage">${trjCourt(`<g id="tj-done"></g>
+      <polyline id="tj-live" fill="none" stroke-width="6" stroke-linecap="round"/>
+      <circle id="tj-dot" r="11" opacity="0"/>`,arcs[0].from[0])}</div>
+    <div class="caption" id="anCap"></div>
+    <p class="fignote">${anim.note||""}</p>
+    <div class="controls"><button class="ctl" id="anPlay">暂停</button><button class="ctl" id="anSlow">慢速</button></div>
+    <div class="phases">${arcs.map((a,i)=>`<span class="ph" data-i="${i}">${a.label}</span>`).join("")}</div>`;
+  const $=s=>host.querySelector(s), live=$("#tj-live"), dot=$("#tj-dot"), done=$("#tj-done"), cap=$("#anCap");
+  let ai=0,t0=null,playing=true,speed=1,raf=0;
+  function setCap(k){const a=arcs[k];cap.textContent=a.label+(a.d?" —— "+a.d:"");
+    cap.style.color=a.kind==="bad"?"var(--cork)":"var(--accent-ink)";
+    host.querySelectorAll(".ph").forEach(e=>e.classList.toggle("on",+e.dataset.i===k));}
+  function frame(now){
+    if(!playing){raf=requestAnimationFrame(frame);return;}
+    if(t0===null){t0=now;setCap(ai);if(ai===0)done.innerHTML="";}
+    const arc=arcs[ai],pts=cache[ai],col=TRJCOLOR[arc.kind||"main"];
+    const t=Math.min(1,(now-t0)/((arc.dur||1300)/speed)),idx=Math.round(eases.inout(t)*64);
+    live.setAttribute("points",pts.slice(0,idx+1).map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" "));
+    live.setAttribute("stroke",col);
+    live.setAttribute("stroke-dasharray",arc.kind&&arc.kind!=="main"?"12 12":"");
+    dot.setAttribute("cx",pts[idx][0]);dot.setAttribute("cy",pts[idx][1]);
+    dot.setAttribute("fill",col);dot.setAttribute("opacity","1");
+    if(t>=1){
+      const pl=document.createElementNS("http://www.w3.org/2000/svg","polyline");
+      pl.setAttribute("points",live.getAttribute("points"));pl.setAttribute("fill","none");
+      pl.setAttribute("stroke",col);pl.setAttribute("stroke-width","5");pl.setAttribute("opacity",".3");
+      if(arc.kind&&arc.kind!=="main")pl.setAttribute("stroke-dasharray","12 12");
+      done.appendChild(pl);
+      const lp=pts[64],mk=document.createElementNS("http://www.w3.org/2000/svg","circle");
+      mk.setAttribute("cx",lp[0]);mk.setAttribute("cy",lp[1]);mk.setAttribute("r","8");
+      mk.setAttribute("fill",col);mk.setAttribute("opacity",".65");done.appendChild(mk);
+      live.setAttribute("points","");dot.setAttribute("opacity","0");
+      ai++;t0=null;
+      if(ai>=arcs.length){playing=false;setTimeout(()=>{ai=0;t0=null;playing=true;},1600/speed);}
+    }
+    raf=requestAnimationFrame(frame);
+  }
+  $("#anPlay").onclick=function(){playing=!playing;this.textContent=playing?"暂停":"播放";};
+  $("#anSlow").onclick=function(){speed=speed===1?0.5:1;this.textContent=speed===1?"慢速":"常速";};
+  raf=requestAnimationFrame(frame);
+  return{stop:()=>cancelAnimationFrame(raf)};
+}
+
+/* ---------------- modal ---------------- */
+function openMove(id){
+  const m=MOVES.find(x=>x.id===id); if(!m)return;
+  stopRunner();
+  const body=document.getElementById("sheetBody");
+  body.innerHTML=`
+    <div class="cat">${m.category} · ${m.difficulty}</div>
+    <h2>${m.name_zh}</h2><div class="en">${m.id} · ${m.name_en}</div>
+    <p class="summary">${m.summary}</p>
+    ${m.anim2?`<div class="tabs" id="animTabs"><button class="chip on" data-t="0">${TABNAME[m.anim.type]||m.anim.type}</button><button class="chip" data-t="1">${TABNAME[m.anim2.type]||m.anim2.type}</button></div>`:""}
+    <div class="player" id="playerHost"></div>
+    <div class="detail">
+      <div class="panel"><h4>要点</h4><ul>${m.key_points.map(k=>`<li>${k}</li>`).join("")}</ul></div>
+      <div class="panel warn"><h4>常见错误</h4><ul>${m.common_mistakes.map(k=>`<li>${k}</li>`).join("")}</ul></div>
+      <div class="panel" style="grid-column:1/-1"><h4>训练方法</h4><ul>${m.drills.map(k=>`<li>${k}</li>`).join("")}</ul></div>
+    </div>
+    ${m.related&&m.related.length?`<div class="rel">相关动作：${m.related.map(r=>{
+        const rm=MOVES.find(x=>x.id===r); return rm?`<a data-go="${r}">${rm.name_zh}</a>`:"";}).join("")}</div>`:""}`;
+  const host=body.querySelector("#playerHost");
+  const mountAnim=a=>{ stopRunner();
+    if(a.type==="footwork")runner=footworkPlayer(host,a);
+    else if(a.type==="chain")runner=chainPlayer(host,a);
+    else if(a.type==="timing")runner=timingPlayer(host,a);
+    else if(a.type==="figure")runner=figurePlayer(host,a);
+    else if(a.type==="trajectory")runner=trajectoryPlayer(host,a);
+    else runner=stancePlayer(host,a); };
+  mountAnim(m.anim);
+  body.querySelectorAll("#animTabs .chip").forEach(b=>b.onclick=()=>{
+    body.querySelectorAll("#animTabs .chip").forEach(x=>x.classList.remove("on"));
+    b.classList.add("on"); mountAnim(b.dataset.t==="0"?m.anim:m.anim2); });
+  body.querySelectorAll("[data-go]").forEach(el=>el.onclick=()=>openMove(el.dataset.go));
+  document.getElementById("overlay").classList.add("open");
+  history.replaceState(null,"","#"+id);
+}
+function closeModal(){ stopRunner(); document.getElementById("overlay").classList.remove("open");
+  history.replaceState(null,"",location.pathname); }
+document.getElementById("close").onclick=closeModal;
+document.getElementById("overlay").addEventListener("click",e=>{if(e.target.id==="overlay")closeModal();});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
+
+renderCats(); renderGrid();
+if(location.hash.length>1) openMove(location.hash.slice(1));
+})();
+</script>
+</body>
+</html>

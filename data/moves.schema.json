@@ -1,0 +1,219 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Badminton Moves Dataset",
+  "description": "Schema for data/moves.json — an array of badminton movement/technique records with self-drawn animation specs. Court coordinates are centimetres on a singles half-court: x 0–610 (left→right facing the net), y 0 = net, y 670 = baseline, y < 0 = opponent side (compressed strip for shuttle origins).",
+  "type": "array",
+  "items": { "$ref": "#/$defs/move" },
+  "$defs": {
+    "point": {
+      "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2,
+      "description": "[x, y] court coordinate in cm"
+    },
+    "move": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "pattern": "^(fw|sk|db|st|pw|df)-[0-9]{2}$", "description": "fw=步伐, sk=手法, db=双打, st=启动与重心, pw=发力技巧, df=防守" },
+        "name_zh": { "type": "string" },
+        "name_en": { "type": "string" },
+        "category": { "enum": ["步伐", "手法", "双打", "启动与重心", "发力技巧", "防守"] },
+        "difficulty": { "enum": ["入门", "进阶", "高级"] },
+        "summary": { "type": "string" },
+        "key_points": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "common_mistakes": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "drills": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "related": { "type": "array", "items": { "type": "string" } },
+        "video": { "type": "string", "description": "Optional external video URL (empty until curated)" },
+        "anim": { "$ref": "#/$defs/anyAnim" },
+        "anim2": { "$ref": "#/$defs/anyAnim", "description": "Optional secondary animation, shown as a tab toggle in the viewer" }
+      },
+      "required": ["id", "name_zh", "name_en", "category", "difficulty", "summary", "key_points", "common_mistakes", "drills", "anim"],
+      "additionalProperties": false
+    },
+    "anyAnim": {
+      "oneOf": [
+        { "$ref": "#/$defs/animFootwork" },
+        { "$ref": "#/$defs/animChain" },
+        { "$ref": "#/$defs/animTiming" },
+        { "$ref": "#/$defs/animStance" },
+        { "$ref": "#/$defs/animFigure" },
+        { "$ref": "#/$defs/animTrajectory" }
+      ]
+    },
+    "animTrajectory": {
+      "type": "object",
+      "description": "Side-view full-court shuttle flight arcs. x runs 0–1340 cm along the court length (net at 670, own baseline 30, opponent baseline 1310, service lines 472/868); heights are cm above ground. Each arc is a quadratic bezier through from → apex → to; the viewer animates arcs sequentially. Arcs crossing the net should clear 155 cm at x=670.",
+      "properties": {
+        "type": { "const": "trajectory" },
+        "arcs": {
+          "type": "array", "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": { "type": "string" },
+              "d": { "type": "string", "description": "caption while this arc plays" },
+              "from": { "$ref": "#/$defs/point", "description": "[x, height] contact point" },
+              "apex": { "$ref": "#/$defs/point", "description": "[x, height] highest point of the arc" },
+              "to": { "$ref": "#/$defs/point", "description": "[x, height] landing point" },
+              "kind": { "enum": ["main", "alt", "bad"], "description": "main=实线主示范, alt=虚线变化, bad=红色反面示范" },
+              "dur": { "type": "number", "description": "flight duration ms (faster shots use smaller values)" }
+            },
+            "required": ["label", "from", "apex", "to"]
+          }
+        },
+        "note": { "type": "string" }
+      },
+      "required": ["type", "arcs"]
+    },
+    "animFigure": {
+      "type": "object",
+      "description": "Side-view stick-figure keyframe animation. Angles in degrees, screen space: 0=right (player's back side), 90=down, 180=left (net side), -90=up. Sequential keyframe angles should stay numerically continuous (use values beyond ±180 rather than wrapping) so linear interpolation sweeps the correct arc.",
+      "properties": {
+        "type": { "const": "figure" },
+        "frames": {
+          "type": "array", "minItems": 2,
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": { "type": "string" },
+              "d": { "type": "string", "description": "caption while this frame is active" },
+              "dur": { "type": "number", "description": "transition duration into this pose, ms" },
+              "hit": { "type": "boolean", "description": "true = contact happens at the END of this frame (flash at racket tip)" },
+              "spin": { "enum": ["in", "out"], "description": "show forearm rotation arrow: in=内旋, out=外旋" },
+              "focus": { "type": "array", "items": { "enum": ["upperArm", "foreArm", "racket", "torso", "legs"] } },
+              "pose": {
+                "type": "object",
+                "description": "Joint angles (deg) + offsets. rootX/rootY shift the pelvis (px); face 0–1 opens the racket-head ellipse (0=edge-on 侧立, 1=face-on 转正).",
+                "properties": {
+                  "rootX": { "type": "number" }, "rootY": { "type": "number" },
+                  "torso": { "type": "number" },
+                  "upperArm": { "type": "number" }, "foreArm": { "type": "number" }, "racket": { "type": "number" },
+                  "face": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "otherUpper": { "type": "number" }, "otherFore": { "type": "number" },
+                  "frontThigh": { "type": "number" }, "frontShin": { "type": "number" }, "frontFoot": { "type": "number" },
+                  "backThigh": { "type": "number" }, "backShin": { "type": "number" }, "backFoot": { "type": "number" }
+                },
+                "required": ["torso", "upperArm", "foreArm", "racket", "frontThigh", "frontShin", "backThigh", "backShin"]
+              }
+            },
+            "required": ["label", "d", "dur", "pose"]
+          }
+        },
+        "note": { "type": "string" }
+      },
+      "required": ["type", "frames"]
+    },
+    "animFootwork": {
+      "type": "object",
+      "description": "Top-down court animation: player marker moves through phases; optional shuttle flight.",
+      "properties": {
+        "type": { "const": "footwork" },
+        "phases": {
+          "type": "array", "minItems": 2,
+          "items": {
+            "type": "object",
+            "properties": {
+              "pos": { "$ref": "#/$defs/point" },
+              "kind": { "enum": ["split", "step", "lunge", "jump", "brake", "recover", "hold"] },
+              "label": { "type": "string" },
+              "dur": { "type": "number", "description": "phase duration in ms" }
+            },
+            "required": ["pos", "kind", "label", "dur"]
+          }
+        },
+        "shuttle": {
+          "oneOf": [
+            { "$ref": "#/$defs/shot" },
+            { "type": "array", "items": { "$ref": "#/$defs/shot" }, "description": "multiple shots in one rally; each fires at its phase index and stays faint afterwards" }
+          ]
+        },
+        "phases2": {
+          "type": "array",
+          "description": "Optional doubles partner (hollow marker), synchronized with phases — must be the SAME length; each entry moves during the corresponding phase using its dur.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "pos": { "$ref": "#/$defs/point" },
+              "kind": { "enum": ["split", "step", "lunge", "jump", "brake", "recover", "hold"] }
+            },
+            "required": ["pos"]
+          }
+        }
+      },
+      "required": ["type", "phases"]
+    },
+    "shot": {
+      "type": "object",
+      "properties": {
+        "at": { "type": "integer", "description": "phase index at which the shuttle flies" },
+        "from": { "$ref": "#/$defs/point" },
+        "to": { "$ref": "#/$defs/point" }
+      },
+      "required": ["at", "from", "to"]
+    },
+    "animChain": {
+      "type": "object",
+      "description": "Kinetic-chain sequence: nodes pulse in order with captions.",
+      "properties": {
+        "type": { "const": "chain" },
+        "nodes": {
+          "type": "array", "minItems": 3,
+          "items": {
+            "type": "object",
+            "properties": {
+              "t": { "type": "string", "description": "node title" },
+              "d": { "type": "string", "description": "caption while active" },
+              "hit": { "type": "boolean", "description": "true = contact moment, highlighted" }
+            },
+            "required": ["t", "d"]
+          }
+        },
+        "note": { "type": "string" }
+      },
+      "required": ["type", "nodes"]
+    },
+    "animTiming": {
+      "type": "object",
+      "description": "Split-step timing axis: centre-of-gravity height curve with event markers on a 0–1 timeline.",
+      "properties": {
+        "type": { "const": "timing" },
+        "events": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "t": { "type": "number", "minimum": 0, "maximum": 1 },
+              "label": { "type": "string" },
+              "hit": { "type": "boolean", "description": "true = opponent contact moment (red marker)" }
+            },
+            "required": ["t", "label"]
+          }
+        },
+        "note": { "type": "string" }
+      },
+      "required": ["type", "events"]
+    },
+    "animStance": {
+      "type": "object",
+      "description": "Static stance with pulsing coverage zones on the court.",
+      "properties": {
+        "type": { "const": "stance" },
+        "player": { "$ref": "#/$defs/point" },
+        "zones": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "dir": { "type": "string" },
+              "label": { "type": "string" },
+              "from": { "$ref": "#/$defs/point" },
+              "to": { "$ref": "#/$defs/point" }
+            },
+            "required": ["label", "from", "to"]
+          }
+        },
+        "note": { "type": "string" }
+      },
+      "required": ["type", "player", "zones"]
+    }
+  }
+}
