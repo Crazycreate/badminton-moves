@@ -2,18 +2,6 @@
 
 [English](README.md) | **简体中文**
 
-<p>
-  <img src="media/demo-figure.svg" width="235" alt="正手高远球——全身模型发力部位标红">
-  <img src="media/demo-anatomy.svg" width="235" alt="小臂内旋——肌肉骨骼解剖动画">
-</p>
-<p>
-  <img src="media/demo-footwork.svg" width="145" alt="正手上网步伐俯视">
-  <img src="media/demo-doubles.svg" width="145" alt="双打攻守站位双人同步">
-  <img src="media/demo-trajectory.svg" width="330" alt="挑球弧线：高挑/平挑/反面示范">
-</p>
-
-> 上面的预览是**由数据规格直接烘焙的动画 SVG**（`tools/gen_readme_media.py` 生成）——整个仓库没有任何视频或 GIF 素材。
-
 羽毛球动作解析数据集 + 交互查看器，结构参考 [exercises-dataset](https://github.com/hasaneyldrm/exercises-dataset) 的「JSON 数据层 + 每动作动画 + index.html 浏览器」模式。
 
 与健身数据集的关键差异：羽毛球没有可用的免版权动图库，所以**动画由自绘 SVG 引擎按数据规格实时渲染**——无媒体文件、无版权问题、完全离线可用。
@@ -42,9 +30,6 @@ badminton-moves/
 │   ├── moves.json        # 数据源（真源，供程序使用）
 │   ├── moves.js          # 由 moves.json 生成，供 index.html 以 file:// 直接打开
 │   └── moves.schema.json # JSON Schema
-├── media/                # README 用的动画 SVG 预览
-├── tools/
-│   └── gen_readme_media.py  # 从 moves.json 烘焙动画 SVG
 ├── README.md             # English
 └── README.zh-CN.md       # 本文件
 ```
