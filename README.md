@@ -3,12 +3,13 @@
 **English** | [简体中文](README.zh-CN.md)
 
 <p>
-  <img src="media/demo-anatomy.svg" width="225" alt="Forearm pronation — bones and muscles, medical-plate style">
-  <img src="media/demo-footwork.svg" width="152" alt="Net approach footwork — top-down">
-  <img src="media/demo-doubles.svg" width="152" alt="Doubles formations — two-player sync">
+  <img src="media/demo-figure.svg" width="235" alt="Forehand clear — full-body model with firing regions in red">
+  <img src="media/demo-anatomy.svg" width="235" alt="Forearm pronation — bones and muscles, medical-plate style">
 </p>
 <p>
-  <img src="media/demo-trajectory.svg" width="540" alt="Lift trajectories — model / variation / anti-pattern">
+  <img src="media/demo-footwork.svg" width="145" alt="Net approach footwork — top-down">
+  <img src="media/demo-doubles.svg" width="145" alt="Doubles formations — two-player sync">
+  <img src="media/demo-trajectory.svg" width="330" alt="Lift trajectories — model / variation / anti-pattern">
 </p>
 
 > The previews above are **animated SVGs baked directly from the dataset specs** by `tools/gen_readme_media.py` — the repository contains no video or GIF assets at all.
@@ -27,7 +28,7 @@ One key difference from the fitness dataset: there is no license-free GIF librar
 | Strokes | `sk-` | 8 | **Trajectory view** — side-view full-court flight arcs (solid = model shot, dashed = variation, red = anti-pattern); net play adds a stick-figure tab, cross-court net uses top-down |
 | Doubles | `db-` | 6 | **Two-player synchronized top-down animation** (solid = you, hollow = partner) with multi-shot rallies |
 | Split step & balance | `st-` | 4 | Timing axis (split step), top-down (recovery / direction change), stance coverage |
-| Power generation | `pw-` | 4 | **Medical-style musculoskeletal close-ups** — humerus/ulna/radius with contracting muscles (belly bulge + colour), the radius visibly crossing the ulna during pronation, labelled like an anatomy plate; plus a kinetic-chain tab |
+| Power generation | `pw-` | 4 | **Three views per move**: full-body model with the firing region highlighted in red as force travels calf→hip→core→upper arm→forearm→fingers (gymvisual-style); medical anatomy close-up (radius crossing the ulna during pronation); kinetic-chain sequence |
 | Defense | `df-` | 3 | Top-down + incoming smash lines |
 
 Every record contains: bilingual name, category, difficulty, summary, key points, common mistakes, drills, related-move links, an animation spec, and a reserved `video` field for future real-footage links.

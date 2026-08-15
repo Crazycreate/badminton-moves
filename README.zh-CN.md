@@ -3,12 +3,13 @@
 [English](README.md) | **简体中文**
 
 <p>
-  <img src="media/demo-anatomy.svg" width="225" alt="小臂内旋——肌肉骨骼解剖动画">
-  <img src="media/demo-footwork.svg" width="152" alt="正手上网步伐俯视">
-  <img src="media/demo-doubles.svg" width="152" alt="双打攻守站位双人同步">
+  <img src="media/demo-figure.svg" width="235" alt="正手高远球——全身模型发力部位标红">
+  <img src="media/demo-anatomy.svg" width="235" alt="小臂内旋——肌肉骨骼解剖动画">
 </p>
 <p>
-  <img src="media/demo-trajectory.svg" width="540" alt="挑球弧线：高挑/平挑/反面示范">
+  <img src="media/demo-footwork.svg" width="145" alt="正手上网步伐俯视">
+  <img src="media/demo-doubles.svg" width="145" alt="双打攻守站位双人同步">
+  <img src="media/demo-trajectory.svg" width="330" alt="挑球弧线：高挑/平挑/反面示范">
 </p>
 
 > 上面的预览是**由数据规格直接烘焙的动画 SVG**（`tools/gen_readme_media.py` 生成）——整个仓库没有任何视频或 GIF 素材。
@@ -27,7 +28,7 @@
 | 双打 | `db-` | 6 | **俯视双人同步动画**（实心=你、空心=搭档），多拍球路还原完整回合 |
 | 手法 | `sk-` | 8 | **弧线视图**（侧视全场球路对比：主示范实线 / 变化虚线 / 反面示范红线）；搓放另配侧视姿态，勾对角用俯视 |
 | 启动与重心 | `st-` | 4 | 时机轴（垫步）、俯视（回收/变向）、站位覆盖 |
-| 发力技巧 | `pw-` | 4 | **医学制图风格的局部肌肉骨骼动画**——肱骨/尺骨/桡骨＋肌肉收缩（鼓起变红）、内旋时桡骨跨过尺骨、解剖图式引线标注；另配发力链双标签 |
+| 发力技巧 | `pw-` | 4 | **每个动作三视角**：全身模型发力部位标红（力量沿小腿→髋→核心→大臂→小臂→手指逐级点亮，健身图鉴风格）／医学解剖特写（内旋时桡骨跨过尺骨）／发力链时序 |
 | 防守 | `df-` | 3 | 俯视 + 来球轨迹 |
 
 每条记录包含：中英文名、分类、难度、概述、要点、常见错误、训练方法、相关动作、动画规格、预留视频链接字段。

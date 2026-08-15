@@ -24,7 +24,8 @@
         "related": { "type": "array", "items": { "type": "string" } },
         "video": { "type": "string", "description": "Optional external video URL (empty until curated)" },
         "anim": { "$ref": "#/$defs/anyAnim" },
-        "anim2": { "$ref": "#/$defs/anyAnim", "description": "Optional secondary animation, shown as a tab toggle in the viewer" }
+        "anim2": { "$ref": "#/$defs/anyAnim", "description": "Optional secondary animation, shown as a tab toggle in the viewer" },
+        "anim3": { "$ref": "#/$defs/anyAnim", "description": "Optional third animation tab" }
       },
       "required": ["id", "name_zh", "name_en", "category", "difficulty", "summary", "key_points", "common_mistakes", "drills", "anim"],
       "additionalProperties": false
@@ -117,7 +118,7 @@
               "focus": { "type": "array", "items": { "enum": ["upperArm", "foreArm", "racket", "torso", "legs"] } },
               "pose": {
                 "type": "object",
-                "description": "Joint angles (deg) + offsets. rootX/rootY shift the pelvis (px); face 0–1 opens the racket-head ellipse (0=edge-on 侧立, 1=face-on 转正).",
+                "description": "Joint angles (deg) + offsets. rootX/rootY shift the pelvis (px); face 0–1 opens the racket-head ellipse (0=edge-on 侧立, 1=face-on 转正). Optional 0–1 activation keys mCalf/mGlutes/mCore/mShoulder/mUarm/mForearm/mHand paint gymvisual-style red highlights on the firing body region.",
                 "properties": {
                   "rootX": { "type": "number" }, "rootY": { "type": "number" },
                   "torso": { "type": "number" },

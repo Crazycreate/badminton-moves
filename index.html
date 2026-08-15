@@ -477,7 +477,29 @@ function figBody(g,P,foc){
     +`<line x1="${grip[0]}" y1="${grip[1]}" x2="${g.tp[0]}" y2="${g.tp[1]}" stroke="var(--ink-2)" stroke-width="4" ${hl("racket")}/>`
     +`<ellipse cx="${hc[0]}" cy="${hc[1]}" rx="${rx}" ry="22" fill="var(--surface)" fill-opacity=".3" stroke="var(--accent-ink)" stroke-width="4.5" transform="rotate(${rka+90} ${hc[0]} ${hc[1]})" ${hl("racket")}/>`
     +strings
-    +`<circle cx="${g.wr[0]}" cy="${g.wr[1]}" r="6.5" fill="${SKIN}"/>`;
+    +`<circle cx="${g.wr[0]}" cy="${g.wr[1]}" r="6.5" fill="${SKIN}"/>`
+    +muscleOverlays(g,P);
+}
+/* gymvisual-style firing-region highlights: pose keys mCalf/mGlutes/mCore/mShoulder/mUarm/mForearm/mHand (0–1) */
+function muscleOverlays(g,P){
+  const R="#C2453A"; let s="";
+  const ell=(a,b,offd,ry,act)=>{ if(!act||act<.05)return"";
+    const mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2,L=Math.hypot(b[0]-a[0],b[1]-a[1])||1;
+    const ang=Math.atan2(b[1]-a[1],b[0]-a[0])*180/Math.PI, n=perpTo(a,b);
+    const cx=mx+n[0]*offd, cy=my+n[1]*offd;
+    return `<ellipse cx="${cx}" cy="${cy}" rx="${L*.46}" ry="${ry+7}" fill="${R}" opacity="${(.22*act).toFixed(2)}" transform="rotate(${ang} ${cx} ${cy})"/>`
+         + `<ellipse cx="${cx}" cy="${cy}" rx="${L*.4}" ry="${ry}" fill="${R}" opacity="${(.8*act).toFixed(2)}" transform="rotate(${ang} ${cx} ${cy})"/>`; };
+  const dot=(p,r,act)=> (!act||act<.05)?"":
+    `<circle cx="${p[0]}" cy="${p[1]}" r="${r+6}" fill="${R}" opacity="${(.22*act).toFixed(2)}"/>`
+   +`<circle cx="${p[0]}" cy="${p[1]}" r="${r}" fill="${R}" opacity="${(.8*act).toFixed(2)}"/>`;
+  s+=ell(g.bk,g.bn,5,7,P.mCalf);      // 小腿蹬地
+  s+=dot(g.rt,13,P.mGlutes);          // 臀髋（转髋）
+  s+=ell(g.rt,g.sh,0,12,P.mCore);     // 核心转体
+  s+=dot(g.sh,11,P.mShoulder);        // 肩
+  s+=ell(g.sh,g.el,0,8,P.mUarm);      // 大臂
+  s+=ell(g.el,g.wr,0,7,P.mForearm);   // 小臂（内/外旋）
+  s+=dot(g.wr,9,P.mHand);             // 手指捏紧
+  return s;
 }
 const STAND={torso:-88,upperArm:80,foreArm:150,racket:-175,face:0.25,frontThigh:103,frontShin:92,frontFoot:182,backThigh:78,backShin:88,backFoot:5};
 
@@ -709,7 +731,7 @@ function openMove(id){
     <div class="cat">${m.category} · ${m.difficulty}</div>
     <h2>${m.name_zh}</h2><div class="en">${m.id} · ${m.name_en}</div>
     <p class="summary">${m.summary}</p>
-    ${m.anim2?`<div class="tabs" id="animTabs"><button class="chip on" data-t="0">${TABNAME[m.anim.type]||m.anim.type}</button><button class="chip" data-t="1">${TABNAME[m.anim2.type]||m.anim2.type}</button></div>`:""}
+    ${(m.anim2||m.anim3)?`<div class="tabs" id="animTabs">${[m.anim,m.anim2,m.anim3].filter(Boolean).map((a,i)=>`<button class="chip ${i===0?"on":""}" data-t="${i}">${TABNAME[a.type]||a.type}</button>`).join("")}</div>`:""}
     <div class="player" id="playerHost"></div>
     <div class="detail">
       <div class="panel"><h4>要点</h4><ul>${m.key_points.map(k=>`<li>${k}</li>`).join("")}</ul></div>
@@ -727,10 +749,11 @@ function openMove(id){
     else if(a.type==="anatomy")runner=anatomyPlayer(host,a);
     else if(a.type==="trajectory")runner=trajectoryPlayer(host,a);
     else runner=stancePlayer(host,a); };
+  const tabsArr=[m.anim,m.anim2,m.anim3].filter(Boolean);
   mountAnim(m.anim);
   body.querySelectorAll("#animTabs .chip").forEach(b=>b.onclick=()=>{
     body.querySelectorAll("#animTabs .chip").forEach(x=>x.classList.remove("on"));
-    b.classList.add("on"); mountAnim(b.dataset.t==="0"?m.anim:m.anim2); });
+    b.classList.add("on"); mountAnim(tabsArr[+b.dataset.t]); });
   body.querySelectorAll("[data-go]").forEach(el=>el.onclick=()=>openMove(el.dataset.go));
   document.getElementById("overlay").classList.add("open");
   history.replaceState(null,"","#"+id);

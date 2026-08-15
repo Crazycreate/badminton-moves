@@ -214,25 +214,65 @@ class BodyEmitter:
         return "".join(parts)
 
 
+def over_svg(samps, Ps, times, total, dur):
+    """gymvisual-style firing-region highlights driven by pose m* keys (0–1)."""
+    R = "#C2453A"; out = []
+    act = lambda key: [p.get(key, 0) for p in Ps]
+
+    def ell(ka, kb, offd, ry, key):
+        a = act(key)
+        if max(a) < .05: return ""
+        cxs, cys, rxs, angs = [], [], [], []
+        for s in samps:
+            p, q = s[ka], s[kb]
+            dx, dy = q[0]-p[0], q[1]-p[1]; L = math.hypot(dx, dy) or 1
+            n = (-dy/L, dx/L); n = n if n[0] >= 0 else (-n[0], -n[1])
+            cxs.append((p[0]+q[0])/2 + n[0]*offd); cys.append((p[1]+q[1])/2 + n[1]*offd)
+            rxs.append(L*.4); angs.append(math.degrees(math.atan2(dy, dx)))
+        rot = ";".join(f"{F(an)} {F(cx)} {F(cy)}" for an, cx, cy in zip(angs, cxs, cys))
+        ops = [round(.8*v, 2) for v in a]
+        return (f'<ellipse ry="{ry}" fill="{R}" opacity="{ops[0]}">'
+                + anim("cx", cxs, times, total, dur) + anim("cy", cys, times, total, dur)
+                + anim("rx", rxs, times, total, dur) + anim("opacity", ops, times, total, dur)
+                + f'<animateTransform attributeName="transform" type="rotate" values="{rot}" '
+                  f'keyTimes="{kt(times,total)}" dur="{dur}s" repeatCount="indefinite" calcMode="linear"/></ellipse>')
+
+    def dot(k, r, key):
+        a = act(key)
+        if max(a) < .05: return ""
+        xs = [s[k][0] for s in samps]; ys = [s[k][1] for s in samps]
+        ops = [round(.8*v, 2) for v in a]
+        return (f'<circle r="{r}" fill="{R}" opacity="{ops[0]}">'
+                + anim("cx", xs, times, total, dur) + anim("cy", ys, times, total, dur)
+                + anim("opacity", ops, times, total, dur) + "</circle>")
+
+    out += [ell("bk", "bn", 5, 7, "mCalf"), dot("rt", 13, "mGlutes"), ell("rt", "sh", 0, 12, "mCore"),
+            dot("sh", 11, "mShoulder"), ell("sh", "el", 0, 8, "mUarm"),
+            ell("el", "wr", 0, 7, "mForearm"), dot("wr", 9, "mHand")]
+    return "".join(out)
+
+
 def gen_figure(move, fname):
     fr = move["anim"]["frames"]
     S = 6
-    times, samples, t_acc = [0.0], [joints(fr[0]["pose"])], 0.0
+    times, samples, Ps, t_acc = [0.0], [joints(fr[0]["pose"])], [fr[0]["pose"]], 0.0
     for i, f in enumerate(fr):
         prev = fr[0]["pose"] if i == 0 else fr[i - 1]["pose"]
         for j in range(1, S + 1):
             times.append(t_acc + f["dur"] * j / S)
-            samples.append(joints(pose_lerp(prev, f["pose"], ease(j / S))))
+            P = pose_lerp(prev, f["pose"], ease(j / S))
+            samples.append(joints(P)); Ps.append(P)
         t_acc += f["dur"]
     total = t_acc + 1100
-    times.append(total); samples.append(samples[-1])
+    times.append(total); samples.append(samples[-1]); Ps.append(Ps[-1])
     g = FIG["ground"]
-    em = BodyEmitter(samples, times, total, total / 1000)
+    dur = total / 1000
+    em = BodyEmitter(samples, times, total, dur)
     svg = (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="30 40 590 470">'
            f'<rect x="30" y="40" width="590" height="470" fill="{C["bg"]}"/>'
            f'<line x1="40" y1="{g}" x2="610" y2="{g}" stroke="#DCE3DE" stroke-width="3"/>'
            f'<line x1="72" y1="{g}" x2="72" y2="{g-168}" stroke="{C["ink3"]}" stroke-width="4" opacity=".55"/>'
-           f'{em.body()}</svg>')
+           f'{em.body()}{over_svg(samples, Ps, times, total, dur)}</svg>')
     open(fname, "w").write(svg)
 
 
@@ -403,6 +443,7 @@ def gen_trajectory(move, fname):
 
 os.makedirs("media", exist_ok=True)
 moves = {m["id"]: m for m in json.load(open("data/moves.json"))}
+gen_figure(moves["pw-01"], "media/demo-figure.svg")
 gen_anatomy(moves["pw-02"], "media/demo-anatomy.svg")
 gen_footwork(moves["fw-02"], "media/demo-footwork.svg")
 gen_footwork(moves["db-01"], "media/demo-doubles.svg", partner=True)
