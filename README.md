@@ -2,6 +2,17 @@
 
 **English** | [简体中文](README.zh-CN.md)
 
+<p>
+  <img src="media/demo-figure.svg" width="225" alt="Forehand clear — side-view stick figure">
+  <img src="media/demo-footwork.svg" width="152" alt="Net approach footwork — top-down">
+  <img src="media/demo-doubles.svg" width="152" alt="Doubles formations — two-player sync">
+</p>
+<p>
+  <img src="media/demo-trajectory.svg" width="540" alt="Lift trajectories — model / variation / anti-pattern">
+</p>
+
+> The previews above are **animated SVGs baked directly from the dataset specs** by `tools/gen_readme_media.py` — the repository contains no video or GIF assets at all.
+
 A structured badminton movement & technique dataset with an interactive viewer. The layout follows the "JSON data layer + per-item animation + `index.html` browser" pattern of [exercises-dataset](https://github.com/hasaneyldrm/exercises-dataset).
 
 One key difference from the fitness dataset: there is no license-free GIF library for badminton, so **every animation here is rendered in real time by self-drawn SVG engines, driven entirely by the data specs** — no media files, no copyright issues, fully offline.
@@ -30,6 +41,9 @@ badminton-moves/
 │   ├── moves.json        # Source of truth (for programmatic use)
 │   ├── moves.js          # Generated from moves.json, lets index.html run from file://
 │   └── moves.schema.json # JSON Schema for the data layer
+├── media/                # Animated SVG previews used by the README
+├── tools/
+│   └── gen_readme_media.py  # Bakes the animated SVGs from data/moves.json
 ├── README.md             # This file
 └── README.zh-CN.md       # Chinese version
 ```
