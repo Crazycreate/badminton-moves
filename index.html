@@ -175,7 +175,7 @@
 "use strict";
 const MOVES = window.BADMINTON_MOVES || [];
 const CATS = ["全部","步伐","手法","双打","启动与重心","发力技巧","防守"];
-const TABNAME = {figure:"侧视姿态",chain:"发力链",footwork:"球场俯视",timing:"时机轴",stance:"站位",trajectory:"弧线视图"};
+const TABNAME = {anatomy:"肌肉骨骼",figure:"侧视姿态",chain:"发力链",footwork:"球场俯视",timing:"时机轴",stance:"站位",trajectory:"弧线视图"};
 let curCat = "全部", curQ = "", runner = null;
 
 /* ---------------- court svg ---------------- */
@@ -219,14 +219,15 @@ function thumb(m){
   }
   if(a.type==="figure"){
     const f=a.frames.find(x=>x.hit)||a.frames[a.frames.length-1], g=computeFig(f.pose);
-    const sg=(p,q,w,c)=>`<line x1="${p[0]}" y1="${p[1]}" x2="${q[0]}" y2="${q[1]}" stroke="${c||'var(--ink-2)'}" stroke-width="${w}" stroke-linecap="round"/>`;
     return `<svg viewBox="150 50 390 460" aria-hidden="true">
       <line x1="160" y1="486" x2="530" y2="486" stroke="var(--line)" stroke-width="4"/>
-      ${sg(g.rt,g.fk,10)}${sg(g.fk,g.fn,10)}${sg(g.rt,g.bk,10)}${sg(g.bk,g.bn,10)}
-      ${sg(g.rt,g.sh,12)}<circle cx="${g.hd[0]}" cy="${g.hd[1]}" r="15" fill="none" stroke="var(--ink-2)" stroke-width="8"/>
-      ${sg(g.sh,g.el,10,'var(--accent)')}${sg(g.el,g.wr,10,'var(--accent)')}${sg(g.wr,g.tp,5,'var(--accent-ink)')}
-      <ellipse cx="${g.tp[0]}" cy="${g.tp[1]}" rx="13" ry="19" fill="none" stroke="var(--accent-ink)" stroke-width="5"
-        transform="rotate(${(f.pose.racket||0)+90} ${g.tp[0]} ${g.tp[1]})"/></svg>`;
+      ${figBody(g,f.pose,new Set())}</svg>`;
+  }
+  if(a.type==="anatomy"){
+    const f=a.frames.find(x=>x.hit)||a.frames[a.frames.length-1];
+    return `<svg viewBox="0 0 640 470" aria-hidden="true">
+      <rect x="6" y="6" width="628" height="458" fill="${ANAT.plate}" stroke="${ANAT.edge}" stroke-width="3"/>
+      ${anatBody(f.pose,a.show||["triceps","pronator","flexors"],a.origin)}</svg>`;
   }
   if(a.type==="chain"){
     const n=a.nodes.length, xs=i=>60+i*(500/(n-1));
@@ -441,19 +442,155 @@ function computeFig(P){
 function lerpPose(A,B,t){const o={};for(const k of new Set([...Object.keys(A),...Object.keys(B)])){
   const a=A[k]==null?B[k]:A[k], b=B[k]==null?A[k]:B[k];
   o[k]=(typeof a==="number"&&typeof b==="number")?lerp(a,b,t):b;}return o;}
+/* volumetric body renderer: tapered-capsule limbs, jersey/shorts/shoes, headband, strung racket */
+const SKIN="#D9A87F";
+function capShape(a,b,r1,r2,fill,extra){
+  const dx=b[0]-a[0],dy=b[1]-a[1],L=Math.hypot(dx,dy)||1,nx=-dy/L,ny=dx/L,e=extra||"";
+  const pts=`${a[0]+nx*r1},${a[1]+ny*r1} ${b[0]+nx*r2},${b[1]+ny*r2} ${b[0]-nx*r2},${b[1]-ny*r2} ${a[0]-nx*r1},${a[1]-ny*r1}`;
+  return `<polygon points="${pts}" fill="${fill}" ${e}/><circle cx="${a[0]}" cy="${a[1]}" r="${r1}" fill="${fill}" ${e}/><circle cx="${b[0]}" cy="${b[1]}" r="${r2}" fill="${fill}" ${e}/>`;
+}
+function figBody(g,P,foc){
+  foc=foc||new Set();
+  const hl=k=>foc.has(k)?'stroke="var(--accent)" stroke-width="4"':'';
+  const jersey="var(--accent)", shorts="var(--ink)", shoeE='fill="var(--surface)" stroke="var(--ink-3)" stroke-width="2.5"';
+  const rka=P.racket||0, fce=P.face||0, rx=5+16*fce;
+  const rr=rka*Math.PI/180, sx=Math.cos(rr), sy=Math.sin(rr), pxv=-sy, pyv=sx;
+  const hc=extPt(g.wr,rka,FIG.rk+18), grip=extPt(g.wr,rka,16);
+  let strings="";
+  for(const o of [-9,0,9]){
+    const cx0=hc[0]+sx*o, cy0=hc[1]+sy*o, half=rx*Math.sqrt(Math.max(0,1-(o*o)/(22*22)));
+    strings+=`<line x1="${cx0+pxv*half}" y1="${cy0+pyv*half}" x2="${cx0-pxv*half}" y2="${cy0-pyv*half}" stroke="var(--line)" stroke-width="2"/>`;
+  }
+  const ta=(P.torso||-90)*Math.PI/180, qx=-Math.sin(ta), qy=Math.cos(ta);
+  const hb=[g.hd[0]+Math.cos(ta)*5, g.hd[1]+Math.sin(ta)*5];
+  const shoeF=capShape(g.fn,g.ffp,8,7,"var(--surface)",shoeE.replace('fill="var(--surface)" ',"")),
+        shoeB=capShape(g.bn,g.bfp,8,7,"var(--surface)",shoeE.replace('fill="var(--surface)" ',""));
+  return `<g opacity=".5">${capShape(g.sh,g.oe,9,7.5,SKIN)}${capShape(g.oe,g.ow,7.5,6,SKIN)}<circle cx="${g.ow[0]}" cy="${g.ow[1]}" r="6" fill="${SKIN}"/></g>`
+    +`<g opacity=".62">${capShape(g.rt,g.bk,13,10,shorts,hl("legs"))}${capShape(g.bk,g.bn,9.5,7.5,SKIN,hl("legs"))}${shoeB}</g>`
+    +capShape(g.rt,g.sh,15,17,jersey,hl("torso"))
+    +`<circle cx="${g.rt[0]}" cy="${g.rt[1]}" r="15" fill="${shorts}"/>`
+    +capShape(g.rt,g.fk,13,10,shorts,hl("legs"))+capShape(g.fk,g.fn,9.5,7.5,SKIN,hl("legs"))+shoeF
+    +capShape(g.sh,g.hd,6.5,5,SKIN)+`<circle cx="${g.hd[0]}" cy="${g.hd[1]}" r="15" fill="${SKIN}"/>`
+    +`<line x1="${hb[0]+qx*13}" y1="${hb[1]+qy*13}" x2="${hb[0]-qx*13}" y2="${hb[1]-qy*13}" stroke="var(--accent)" stroke-width="6" stroke-linecap="round"/>`
+    +capShape(g.sh,g.el,9.5,8,SKIN,hl("upperArm"))+capShape(g.el,g.wr,8,6.5,SKIN,hl("foreArm"))
+    +capShape(g.wr,grip,5.5,5,"var(--ink)")
+    +`<line x1="${grip[0]}" y1="${grip[1]}" x2="${g.tp[0]}" y2="${g.tp[1]}" stroke="var(--ink-2)" stroke-width="4" ${hl("racket")}/>`
+    +`<ellipse cx="${hc[0]}" cy="${hc[1]}" rx="${rx}" ry="22" fill="var(--surface)" fill-opacity=".3" stroke="var(--accent-ink)" stroke-width="4.5" transform="rotate(${rka+90} ${hc[0]} ${hc[1]})" ${hl("racket")}/>`
+    +strings
+    +`<circle cx="${g.wr[0]}" cy="${g.wr[1]}" r="6.5" fill="${SKIN}"/>`;
+}
+const STAND={torso:-88,upperArm:80,foreArm:150,racket:-175,face:0.25,frontThigh:103,frontShin:92,frontFoot:182,backThigh:78,backShin:88,backFoot:5};
+
+/* ---- anatomy engine: medical-plate close-up of the racket arm (bones + muscles) ---- */
+const ANAT={S:[200,360],hum:150,fore:140,hand:38,
+  plate:"#F8F4EA",edge:"#D9CFBA",bone:"#EFE7D2",boneS:"#C4B896",
+  musPale:[216,154,148],musRed:[178,62,52],ink:"#6A5F4B",active:"#B23E34",
+  handF:"#E6D9BC",grip:"#3A342C"};
+const mixC=(a,b,t)=>`rgb(${Math.round(a[0]+(b[0]-a[0])*t)},${Math.round(a[1]+(b[1]-a[1])*t)},${Math.round(a[2]+(b[2]-a[2])*t)})`;
+function perpTo(a,b){const dx=b[0]-a[0],dy=b[1]-a[1],L=Math.hypot(dx,dy)||1;let n=[-dy/L,dx/L];if(n[0]<0)n=[-n[0],-n[1]];return n;}
+function off(p,n,d){return [p[0]+n[0]*d,p[1]+n[1]*d];}
+function boneShape(a,b,shaft,end){
+  return capShape(a,b,shaft,shaft,ANAT.bone,`stroke="${ANAT.boneS}" stroke-width="2"`)
+    +`<circle cx="${a[0]}" cy="${a[1]}" r="${end}" fill="${ANAT.bone}" stroke="${ANAT.boneS}" stroke-width="2"/>`
+    +`<circle cx="${b[0]}" cy="${b[1]}" r="${end}" fill="${ANAT.bone}" stroke="${ANAT.boneS}" stroke-width="2"/>`;
+}
+function muscleShape(o,i,act,ry0,ryX){
+  const cx=(o[0]+i[0])/2, cy=(o[1]+i[1])/2, L=Math.hypot(i[0]-o[0],i[1]-o[1]);
+  const ang=Math.atan2(i[1]-o[1],i[0]-o[0])*180/Math.PI;
+  return `<ellipse cx="${cx}" cy="${cy}" rx="${L/2}" ry="${ry0+ryX*act}" fill="${mixC(ANAT.musPale,ANAT.musRed,act)}" opacity=".88" transform="rotate(${ang} ${cx} ${cy})"/>`;
+}
+const MUSCLE_TXT={triceps:"肱三头肌",biceps:"肱二头肌",pronator:"旋前圆肌",supinator:"旋后肌",flexors:"前臂屈肌群"};
+function anatGeom(P,origin){
+  const S=origin||ANAT.S, E=extPt(S,P.upperArm,ANAT.hum), W=extPt(E,P.foreArm,ANAT.fore);
+  const H=extPt(W,(P.hand==null?P.foreArm+12:P.hand),ANAT.hand);
+  const nH=perpTo(S,E), nF=perpTo(E,W), pron=P.pron||0;
+  const rP=off(E,nF,9), rD=off(W,nF,9-18*pron);            // radius: crosses over as pron→1
+  const uP=off(E,nF,-5), uD=off(W,nF,-5);                  // ulna: stays put
+  const radMid=t=>[rP[0]+(rD[0]-rP[0])*t, rP[1]+(rD[1]-rP[1])*t];
+  return {S,E,W,H,nH,nF,rP,rD,uP,uD,pron,
+    triceps:[off(S,nH,16),off(E,nH,12)],
+    biceps:[off(S,nH,-14),off([E[0]*.82+W[0]*.18,E[1]*.82+W[1]*.18],nF,-8)],
+    pronator:[off(E,nF,-10),radMid(.42)],
+    supinator:[off(E,nH,10),radMid(.25)],
+    flexors:[off(E,nF,-11),off(W,nF,-7)]};
+}
+function anatBody(P,show,origin){
+  const g=anatGeom(P,origin), a=k=>P[k]||0;
+  const mus={triceps:[g.triceps,13,7],biceps:[g.biceps,11,6],pronator:[g.pronator,8,5],
+             supinator:[g.supinator,7,5],flexors:[g.flexors,8,5]};
+  const grip1=extPt(g.W,(P.hand==null?P.foreArm+12:P.hand),ANAT.hand+34);
+  let s=boneShape(g.S,g.E,6,11);                                        // 肱骨
+  for(const k of ["triceps","biceps"]) if(show.includes(k)) s+=muscleShape(mus[k][0][0],mus[k][0][1],a(k),mus[k][1],mus[k][2]);
+  s+=boneShape(g.uP,g.uD,5,8);                                          // 尺骨
+  s+=boneShape(g.rP,g.rD,4.5,7);                                        // 桡骨（旋前时跨过尺骨）
+  for(const k of ["pronator","supinator","flexors"]) if(show.includes(k)) s+=muscleShape(mus[k][0][0],mus[k][0][1],a(k),mus[k][1],mus[k][2]);
+  s+=`<circle cx="${g.E[0]}" cy="${g.E[1]}" r="7" fill="${ANAT.bone}" stroke="${ANAT.boneS}" stroke-width="2"/>`;
+  s+=capShape(g.W,g.H,9,7,ANAT.handF,`stroke="${ANAT.boneS}" stroke-width="1.5"`);
+  s+=capShape(g.H,grip1,4.5,4,ANAT.grip);
+  // labels + leaders (fixed slots, moving anchors)
+  const anchors={humerus:off([(g.S[0]+g.E[0])/2,(g.S[1]+g.E[1])/2],g.nH,2),
+    radius:g.pron>0.5?off(radMidPt(g,.6),[0,0],0):radMidPt(g,.6), ulna:off([(g.uP[0]+g.uD[0])/2,(g.uP[1]+g.uD[1])/2],g.nF,-4)};
+  function radMidPt(gg,t){return [gg.rP[0]+(gg.rD[0]-gg.rP[0])*t, gg.rP[1]+(gg.rD[1]-gg.rP[1])*t];}
+  const labels=[["humerus","肱骨",0],["radius","桡骨",0],["ulna","尺骨",0]]
+    .concat(show.map(k=>[k,MUSCLE_TXT[k],a(k)]));
+  labels.forEach((L,idx)=>{
+    const y=64+idx*40, anc=anchors[L[0]]||[(mus[L[0]][0][0][0]+mus[L[0]][0][1][0])/2,(mus[L[0]][0][0][1]+mus[L[0]][0][1][1])/2];
+    const hot=L[2]>0.55;
+    s+=`<polyline points="${anc[0]},${anc[1]} 452,${y} 468,${y}" fill="none" stroke="${hot?ANAT.active:ANAT.boneS}" stroke-width="1.5"/>`
+      +`<text x="474" y="${y+5}" font-size="16" fill="${hot?ANAT.active:ANAT.ink}" font-weight="${hot?"700":"400"}">${L[1]}</text>`;
+  });
+  return s;
+}
+function anatomyPlayer(host,anim){
+  const fr=anim.frames, show=anim.show||["triceps","pronator","flexors"];
+  host.innerHTML=`<div class="stage" style="background:${ANAT.plate}"><svg viewBox="0 0 640 470">
+      <rect x="6" y="6" width="628" height="458" fill="${ANAT.plate}" stroke="${ANAT.edge}" stroke-width="2"/>
+      <g id="an-body"></g>
+      <g id="fg-spin" opacity="0"><path d="M -24 8 A 25 25 0 1 1 20 14" fill="none" stroke="var(--cork)" stroke-width="4"/>
+        <path d="M 20 14 l 12 -4 l -5 12 z" fill="var(--cork)"/><text id="fg-spinT" x="34" y="-8" font-size="19" font-weight="700" fill="var(--cork)"></text></g>
+      <circle id="fg-hit" r="10" fill="none" stroke="var(--cork)" stroke-width="5" opacity="0"/>
+    </svg></div>
+    <div class="caption" id="anCap"></div>
+    <p class="fignote">${anim.note||""}</p>
+    <div class="controls"><button class="ctl" id="anPlay">暂停</button><button class="ctl" id="anSlow">慢速</button></div>
+    <div class="phases">${fr.map((p,i)=>`<span class="ph" data-i="${i}">${i+1}. ${p.label}</span>`).join("")}</div>`;
+  const $=s=>host.querySelector(s), body=$("#an-body"), spin=$("#fg-spin"), spinT=$("#fg-spinT"), hitC=$("#fg-hit"), cap=$("#anCap");
+  let i=0,t0=null,playing=true,speed=1,raf=0,hitT=null;
+  function setCap(k){cap.textContent=`${k+1} / ${fr.length} · ${fr[k].label} —— ${fr[k].d}`;
+    host.querySelectorAll(".ph").forEach(e=>e.classList.toggle("on",+e.dataset.i===k));}
+  function frame(now){
+    if(!playing){raf=requestAnimationFrame(frame);return;}
+    if(t0===null){t0=now;setCap(i);}
+    const cur=fr[i], from=i===0?fr[0].pose:fr[i-1].pose;
+    const t=Math.min(1,(now-t0)/(cur.dur/speed)), P=lerpPose(from,cur.pose,eases.inout(t));
+    body.innerHTML=anatBody(P,show,anim.origin);
+    const g=anatGeom(P,anim.origin);
+    if(cur.spin&&t>.2){const m=[(g.E[0]+g.W[0])/2,(g.E[1]+g.W[1])/2];
+      spin.setAttribute("opacity",String(.5+.5*Math.abs(Math.sin(now/200))));
+      spin.setAttribute("transform",`translate(${m[0]},${m[1]})`);spinT.textContent=cur.spin==="out"?"外旋":"内旋";}
+    else spin.setAttribute("opacity","0");
+    if(hitT!==null){const q=Math.min(1,(now-hitT)/420);
+      hitC.setAttribute("cx",g.W[0]);hitC.setAttribute("cy",g.W[1]);
+      hitC.setAttribute("r",String(10+30*q));hitC.setAttribute("opacity",String(1-q));
+      if(q>=1)hitT=null;}
+    else hitC.setAttribute("opacity","0");
+    if(t>=1){if(cur.hit)hitT=now;i++;t0=null;
+      if(i>=fr.length){playing=false;setTimeout(()=>{i=0;t0=null;playing=true;},1100/speed);}}
+    raf=requestAnimationFrame(frame);
+  }
+  $("#anPlay").onclick=function(){playing=!playing;this.textContent=playing?"暂停":"播放";};
+  $("#anSlow").onclick=function(){speed=speed===1?0.4:1;this.textContent=speed===1?"慢速":"常速";};
+  raf=requestAnimationFrame(frame);
+  return{stop:()=>cancelAnimationFrame(raf)};
+}
 function figurePlayer(host,anim){
   const fr=anim.frames;
-  const L=(id,w,cls)=>`<line id="fg-${id}" stroke-linecap="round" stroke-width="${w}" class="${cls||"fseg"}"/>`;
   host.innerHTML=`<div class="stage"><svg viewBox="30 40 590 470">
       <line x1="40" y1="${FIG.ground}" x2="610" y2="${FIG.ground}" stroke="var(--line)" stroke-width="3"/>
       <line x1="72" y1="${FIG.ground}" x2="72" y2="${FIG.ground-168}" stroke="var(--ink-3)" stroke-width="4" opacity=".55"/>
       <text x="72" y="${FIG.ground-178}" text-anchor="middle" font-size="19" fill="var(--ink-3)">网</text>
+      <g id="fg-body"></g>
       <polyline id="fg-trail" fill="none" stroke="var(--accent)" stroke-width="4" opacity=".4"/>
-      ${L("oua",8,"fseg dim")}${L("ofa",8,"fseg dim")}
-      ${L("bth",11)}${L("bsh",11)}${L("bft",9)}${L("fth",11)}${L("fsh",11)}${L("fft",9)}
-      ${L("tor",13)}<circle id="fg-head" r="${FIG.headR}" fill="none" stroke="var(--ink-2)" stroke-width="9"/>
-      ${L("ua",11)}${L("fa",11)}${L("rksh",5,"frk")}
-      <ellipse id="fg-rkhd" fill="none" class="frk" stroke-width="5" ry="22"/>
       <g id="fg-spin" opacity="0"><path d="M -24 8 A 25 25 0 1 1 20 14" fill="none" stroke="var(--cork)" stroke-width="4"/>
         <path d="M 20 14 l 12 -4 l -5 12 z" fill="var(--cork)"/><text id="fg-spinT" x="34" y="-8" font-size="19" font-weight="700" fill="var(--cork)"></text></g>
       <circle id="fg-hit" r="10" fill="none" stroke="var(--cork)" stroke-width="5" opacity="0"/>
@@ -464,10 +601,7 @@ function figurePlayer(host,anim){
     <div class="controls"><button class="ctl" id="anPlay">暂停</button><button class="ctl" id="anSlow">慢速</button></div>
     <div class="phases">${fr.map((p,i)=>`<span class="ph" data-i="${i}">${i+1}. ${p.label}</span>`).join("")}</div>`;
   const $=s=>host.querySelector(s), gid=id=>$("#fg-"+id);
-  const segs={oua:gid("oua"),ofa:gid("ofa"),bth:gid("bth"),bsh:gid("bsh"),bft:gid("bft"),fth:gid("fth"),fsh:gid("fsh"),fft:gid("fft"),tor:gid("tor"),ua:gid("ua"),fa:gid("fa"),rksh:gid("rksh")};
-  const rkhd=gid("rkhd"),head=gid("head"),spin=gid("spin"),spinT=gid("spinT"),hitC=gid("hit"),shu=gid("shu"),trail=gid("trail"),cap=$("#anCap");
-  const FOCUS={upperArm:["ua"],foreArm:["fa"],racket:["rksh"],torso:["tor"],legs:["fth","fsh","bth","bsh"]};
-  const setL=(e,a,b)=>{e.setAttribute("x1",a[0]);e.setAttribute("y1",a[1]);e.setAttribute("x2",b[0]);e.setAttribute("y2",b[1]);};
+  const body=gid("body"),spin=gid("spin"),spinT=gid("spinT"),hitC=gid("hit"),shu=gid("shu"),trail=gid("trail"),cap=$("#anCap");
   let i=0,t0=null,playing=true,speed=1,raf=0,hitT=null,tick=0;
   function setCap(k){cap.textContent=`${k+1} / ${fr.length} · ${fr[k].label} —— ${fr[k].d}`;
     host.querySelectorAll(".ph").forEach(e=>e.classList.toggle("on",+e.dataset.i===k));}
@@ -476,18 +610,7 @@ function figurePlayer(host,anim){
     if(t0===null){t0=now;setCap(i);if(i===0)trail.setAttribute("points","");}
     const cur=fr[i],prev=fr[(i-1+fr.length)%fr.length],from=i===0?fr[0].pose:prev.pose;
     const t=Math.min(1,(now-t0)/(cur.dur/speed)),P=lerpPose(from,cur.pose,eases.inout(t)),g=computeFig(P);
-    setL(segs.tor,g.rt,g.sh);setL(segs.ua,g.sh,g.el);setL(segs.fa,g.el,g.wr);setL(segs.rksh,g.wr,g.tp);
-    setL(segs.oua,g.sh,g.oe);setL(segs.ofa,g.oe,g.ow);
-    setL(segs.fth,g.rt,g.fk);setL(segs.fsh,g.fk,g.fn);setL(segs.fft,g.fn,g.ffp);
-    setL(segs.bth,g.rt,g.bk);setL(segs.bsh,g.bk,g.bn);setL(segs.bft,g.bn,g.bfp);
-    head.setAttribute("cx",g.hd[0]);head.setAttribute("cy",g.hd[1]);
-    const hc=extPt(g.wr,P.racket,FIG.rk+18);
-    rkhd.setAttribute("cx",hc[0]);rkhd.setAttribute("cy",hc[1]);
-    rkhd.setAttribute("rx",String(5+16*(P.face||0)));
-    rkhd.setAttribute("transform",`rotate(${(P.racket||0)+90} ${hc[0]} ${hc[1]})`);
-    const foc=new Set((cur.focus||[]).flatMap(f=>FOCUS[f]||[]));
-    for(const k in segs){const on=foc.has(k);segs[k].style.stroke=on?"var(--accent)":"";segs[k].style.strokeWidth=on?(k==="rksh"?"8":"15"):"";}
-    rkhd.style.stroke=foc.has("rksh")?"var(--accent)":"";
+    body.innerHTML=figBody(g,P,new Set(cur.focus||[]));
     if(cur.spin&&t>.25){const m=[(g.el[0]+g.wr[0])/2,(g.el[1]+g.wr[1])/2];
       spin.setAttribute("opacity",String(.5+.5*Math.abs(Math.sin(now/200))));
       spin.setAttribute("transform",`translate(${m[0]},${m[1]})`);spinT.textContent=cur.spin==="out"?"外旋":"内旋";}
@@ -529,8 +652,7 @@ function trjCourt(inner,px){
     <rect x="${TRJ.net-9}" y="${nt}" width="18" height="15" fill="var(--ink-3)"/>
     <text x="330" y="${g+42}" text-anchor="middle" font-size="27" fill="var(--ink-3)">己方半场</text>
     <text x="1010" y="${g+42}" text-anchor="middle" font-size="27" fill="var(--ink-3)">对方半场</text>
-    ${px?`<line x1="${px}" y1="${g}" x2="${px}" y2="${g-118}" stroke="var(--ink-2)" stroke-width="9" stroke-linecap="round"/>
-      <circle cx="${px}" cy="${g-138}" r="17" fill="none" stroke="var(--ink-2)" stroke-width="8"/>`:""}
+    ${px?`<g transform="translate(${px},${g}) scale(0.5) translate(${-FIG.rootX},${-FIG.ground})">${figBody(computeFig(STAND),STAND,new Set())}</g>`:""}
     ${inner}</svg>`;
 }
 function trajectoryPlayer(host,anim){
@@ -602,6 +724,7 @@ function openMove(id){
     else if(a.type==="chain")runner=chainPlayer(host,a);
     else if(a.type==="timing")runner=timingPlayer(host,a);
     else if(a.type==="figure")runner=figurePlayer(host,a);
+    else if(a.type==="anatomy")runner=anatomyPlayer(host,a);
     else if(a.type==="trajectory")runner=trajectoryPlayer(host,a);
     else runner=stancePlayer(host,a); };
   mountAnim(m.anim);

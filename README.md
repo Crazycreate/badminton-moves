@@ -3,7 +3,7 @@
 **English** | [简体中文](README.zh-CN.md)
 
 <p>
-  <img src="media/demo-figure.svg" width="225" alt="Forehand clear — side-view stick figure">
+  <img src="media/demo-anatomy.svg" width="225" alt="Forearm pronation — bones and muscles, medical-plate style">
   <img src="media/demo-footwork.svg" width="152" alt="Net approach footwork — top-down">
   <img src="media/demo-doubles.svg" width="152" alt="Doubles formations — two-player sync">
 </p>
@@ -27,7 +27,7 @@ One key difference from the fitness dataset: there is no license-free GIF librar
 | Strokes | `sk-` | 8 | **Trajectory view** — side-view full-court flight arcs (solid = model shot, dashed = variation, red = anti-pattern); net play adds a stick-figure tab, cross-court net uses top-down |
 | Doubles | `db-` | 6 | **Two-player synchronized top-down animation** (solid = you, hollow = partner) with multi-shot rallies |
 | Split step & balance | `st-` | 4 | Timing axis (split step), top-down (recovery / direction change), stance coverage |
-| Power generation | `pw-` | 4 | **Side-view stick figure** — upper-arm / forearm / racket-face keyframes with pronation–supination arrows, active-segment highlighting and racket-tip trail, plus a kinetic-chain tab |
+| Power generation | `pw-` | 4 | **Medical-style musculoskeletal close-ups** — humerus/ulna/radius with contracting muscles (belly bulge + colour), the radius visibly crossing the ulna during pronation, labelled like an anatomy plate; plus a kinetic-chain tab |
 | Defense | `df-` | 3 | Top-down + incoming smash lines |
 
 Every record contains: bilingual name, category, difficulty, summary, key points, common mistakes, drills, related-move links, an animation spec, and a reserved `video` field for future real-footage links.
@@ -77,7 +77,8 @@ Append a record to `data/moves.json` (validate against `moves.schema.json`) and 
 - `chain` — kinetic-chain `nodes` (title + caption; `hit: true` marks the contact link)
 - `timing` — timeline `events` (0–1 instants + labels; `hit: true` = opponent's contact)
 - `stance` — `player` position and `zones` coverage rectangles
-- `figure` — side-view stick-figure keyframes: per-frame joint angles (upper arm / forearm / racket / torso / legs), `focus` highlights the active segment, `spin` shows a pronation (`in`) or supination (`out`) arrow, `hit` flashes at the racket tip at the end of the frame
+- `anatomy` — medical-plate close-up of the racket arm: joint angles + `pron` 0–1 (radius crossing = pronation) + per-muscle activation 0–1; `show` picks which muscles are drawn and labelled
+- `figure` — side-view human-figure keyframes: per-frame joint angles (upper arm / forearm / racket / torso / legs), `focus` highlights the active segment, `spin` shows a pronation (`in`) or supination (`out`) arrow, `hit` flashes at the racket tip at the end of the frame
 - `trajectory` — full-court flight arcs, each defined by `from` / `apex` / `to` (`[x, height-cm]`, net at x=670); `kind` distinguishes model / variation / anti-pattern arcs
 
 A record may also carry an optional `anim2` (any type) — the viewer shows a tab toggle (e.g. power moves pair a stick-figure view with a kinetic-chain view).

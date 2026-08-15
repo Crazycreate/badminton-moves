@@ -36,8 +36,43 @@
         { "$ref": "#/$defs/animTiming" },
         { "$ref": "#/$defs/animStance" },
         { "$ref": "#/$defs/animFigure" },
-        { "$ref": "#/$defs/animTrajectory" }
+        { "$ref": "#/$defs/animTrajectory" },
+        { "$ref": "#/$defs/animAnatomy" }
       ]
+    },
+    "animAnatomy": {
+      "type": "object",
+      "description": "Medical-plate close-up of the racket arm: humerus/ulna/radius bones plus selected muscles rendered as fusiform bellies that bulge and redden with activation. pose.pron 0–1 drives the radius crossing over the ulna (pronation); labels with leader lines identify each part like an anatomy plate.",
+      "properties": {
+        "type": { "const": "anatomy" },
+        "origin": { "$ref": "#/$defs/point", "description": "Shoulder anchor in plate coordinates (default [200,360])" },
+        "show": {
+          "type": "array",
+          "items": { "enum": ["triceps", "biceps", "pronator", "supinator", "flexors"] },
+          "description": "Which muscles to draw and label"
+        },
+        "frames": {
+          "type": "array", "minItems": 2,
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": { "type": "string" },
+              "d": { "type": "string" },
+              "dur": { "type": "number" },
+              "hit": { "type": "boolean" },
+              "spin": { "enum": ["in", "out"] },
+              "pose": {
+                "type": "object",
+                "description": "upperArm/foreArm[/hand] angles in degrees; pron 0–1 (radius crossing = pronation); plus a 0–1 activation value per shown muscle (triceps/biceps/pronator/supinator/flexors)",
+                "additionalProperties": { "type": "number" }
+              }
+            },
+            "required": ["label", "d", "dur", "pose"]
+          }
+        },
+        "note": { "type": "string" }
+      },
+      "required": ["type", "frames"]
     },
     "animTrajectory": {
       "type": "object",
@@ -66,7 +101,7 @@
     },
     "animFigure": {
       "type": "object",
-      "description": "Side-view stick-figure keyframe animation. Angles in degrees, screen space: 0=right (player's back side), 90=down, 180=left (net side), -90=up. Sequential keyframe angles should stay numerically continuous (use values beyond ±180 rather than wrapping) so linear interpolation sweeps the correct arc.",
+      "description": "Side-view human-figure keyframe animation (rendered as a volumetric body model). Angles in degrees, screen space: 0=right (player's back side), 90=down, 180=left (net side), -90=up. Sequential keyframe angles should stay numerically continuous (use values beyond ±180 rather than wrapping) so linear interpolation sweeps the correct arc.",
       "properties": {
         "type": { "const": "figure" },
         "frames": {

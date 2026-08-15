@@ -1014,134 +1014,66 @@ window.BADMINTON_MOVES = [
   ],
   "video": "",
   "anim": {
-   "type": "figure",
-   "note": "从右侧观察，球网在左；绿色高亮 = 当前发力主角，红色箭头 = 旋转方向",
+   "type": "anatomy",
+   "show": [
+    "triceps",
+    "pronator",
+    "flexors"
+   ],
+   "note": "右臂内侧观 · 肌肉越红=收缩越强；注意内旋帧里桡骨（外侧骨）跨过尺骨",
    "frames": [
     {
-     "label": "侧身架拍",
-     "d": "大臂抬起、肘指后上；小臂竖立放松，重心压后脚",
+     "label": "架拍 · 屈肘",
+     "d": "屈肘架拍，肱三头肌被预拉长——像拉开的弓",
      "dur": 1000,
-     "focus": [
-      "upperArm"
-     ],
      "pose": {
-      "rootX": 26,
-      "rootY": 2,
-      "torso": -78,
-      "upperArm": -38,
+      "upperArm": -45,
       "foreArm": -100,
-      "racket": -50,
-      "face": 0.12,
-      "frontThigh": 124,
-      "frontShin": 102,
-      "frontFoot": 186,
-      "backThigh": 74,
-      "backShin": 86,
-      "backFoot": 10,
-      "otherUpper": -155,
-      "otherFore": -165
+      "pron": 0.15,
+      "triceps": 0.15,
+      "pronator": 0.1,
+      "flexors": 0.1
      }
     },
     {
-     "label": "蹬转 · 倒拍",
-     "d": "蹬地转髋、重心前送；小臂顺势向后倒拍，力量先不释放",
-     "dur": 800,
-     "focus": [
-      "foreArm"
-     ],
+     "label": "伸肘 · 肱三头肌",
+     "d": "肱三头肌收缩伸肘——肘走在拍前，小臂被甩出",
+     "dur": 750,
      "pose": {
-      "rootX": 6,
-      "rootY": 4,
-      "torso": -86,
-      "upperArm": -20,
-      "foreArm": -30,
-      "racket": 55,
-      "face": 0.12,
-      "frontThigh": 118,
-      "frontShin": 98,
-      "frontFoot": 184,
-      "backThigh": 82,
-      "backShin": 96,
-      "backFoot": 55,
-      "otherUpper": -180,
-      "otherFore": -185
+      "upperArm": -70,
+      "foreArm": -25,
+      "pron": 0.15,
+      "triceps": 1,
+      "pronator": 0.15,
+      "flexors": 0.1
      }
     },
     {
-     "label": "肘领先",
-     "d": "大臂带肘向前上顶，小臂和拍被甩在身后——鞭子拉开了",
-     "dur": 650,
-     "focus": [
-      "upperArm",
-      "foreArm"
-     ],
-     "pose": {
-      "rootX": -10,
-      "rootY": 2,
-      "torso": -94,
-      "upperArm": -78,
-      "foreArm": -8,
-      "racket": 70,
-      "face": 0.2,
-      "frontThigh": 116,
-      "frontShin": 94,
-      "frontFoot": 182,
-      "backThigh": 86,
-      "backShin": 102,
-      "backFoot": 72,
-      "otherUpper": -212,
-      "otherFore": -238
-     }
-    },
-    {
-     "label": "内旋击球",
-     "d": "小臂快速内旋、拍面转正，最高点触球，手指同时捏紧",
-     "dur": 450,
+     "label": "内旋 · 旋前肌群",
+     "d": "旋前圆肌收缩，桡骨绕尺骨翻转——拍面由侧立转正",
+     "dur": 600,
      "hit": true,
      "spin": "in",
-     "focus": [
-      "foreArm",
-      "racket"
-     ],
      "pose": {
-      "rootX": -18,
-      "rootY": 0,
-      "torso": -96,
       "upperArm": -66,
-      "foreArm": -112,
-      "racket": -118,
-      "face": 0.95,
-      "frontThigh": 118,
-      "frontShin": 92,
-      "frontFoot": 182,
-      "backThigh": 80,
-      "backShin": 94,
-      "backFoot": 78,
-      "otherUpper": -226,
-      "otherFore": -256
+      "foreArm": -100,
+      "pron": 0.95,
+      "triceps": 0.45,
+      "pronator": 1,
+      "flexors": 0.3
      }
     },
     {
-     "label": "随挥放松",
-     "d": "顺惯性收拍向左前下方，握力立即回松，衔接回动",
+     "label": "顿击 · 放松",
+     "d": "前臂屈肌群瞬间收缩完成手指顿击，随即整体放松",
      "dur": 800,
-     "focus": [],
      "pose": {
-      "rootX": -28,
-      "rootY": 6,
-      "torso": -102,
-      "upperArm": -150,
-      "foreArm": -172,
-      "racket": -185,
-      "face": 0.4,
-      "frontThigh": 124,
-      "frontShin": 100,
-      "frontFoot": 184,
-      "backThigh": 92,
-      "backShin": 104,
-      "backFoot": 60,
-      "otherUpper": -238,
-      "otherFore": -266
+      "upperArm": -80,
+      "foreArm": -130,
+      "pron": 0.75,
+      "triceps": 0.2,
+      "pronator": 0.35,
+      "flexors": 0.95
      }
     }
    ]
@@ -1210,106 +1142,66 @@ window.BADMINTON_MOVES = [
   ],
   "video": "",
   "anim": {
-   "type": "figure",
-   "note": "下肢刻意保持不动，只看大臂-小臂-拍面的接力；红色箭头 = 内旋方向",
+   "type": "anatomy",
+   "show": [
+    "triceps",
+    "pronator",
+    "flexors"
+   ],
+   "note": "内旋的解剖本质：桡骨绕尺骨翻转。中立位两骨平行，完全旋前时桡骨跨过尺骨",
    "frames": [
     {
-     "label": "松握侧立",
-     "d": "虎口留缝松握，拍面自然侧立——小臂此刻完全放松",
-     "dur": 950,
-     "focus": [
-      "foreArm"
-     ],
+     "label": "中立位 · 松握",
+     "d": "桡骨与尺骨平行＝中立位；松握，前臂肌肉全部放松",
+     "dur": 1000,
      "pose": {
-      "rootX": 0,
-      "torso": -88,
-      "upperArm": -60,
+      "upperArm": -55,
       "foreArm": -95,
-      "racket": -70,
-      "face": 0.1,
-      "frontThigh": 112,
-      "frontShin": 95,
-      "frontFoot": 183,
-      "backThigh": 84,
-      "backShin": 90,
-      "backFoot": 8,
-      "otherUpper": 128,
-      "otherFore": 108
+      "pron": 0.05,
+      "triceps": 0.1,
+      "pronator": 0.05,
+      "flexors": 0.1
      }
     },
     {
      "label": "肘领先 · 小臂滞后",
-     "d": "大臂先动：肘向前上顶，小臂被留在身后——鞭打的势能在这里形成",
+     "d": "大臂带肘，前臂被留在身后——旋前肌群仍在待命",
      "dur": 800,
-     "focus": [
-      "upperArm"
-     ],
      "pose": {
-      "rootX": 0,
-      "torso": -90,
-      "upperArm": -80,
-      "foreArm": -15,
-      "racket": 60,
-      "face": 0.15,
-      "frontThigh": 112,
-      "frontShin": 95,
-      "frontFoot": 183,
-      "backThigh": 84,
-      "backShin": 90,
-      "backFoot": 8,
-      "otherUpper": 128,
-      "otherFore": 108
+      "upperArm": -78,
+      "foreArm": -25,
+      "pron": 0.08,
+      "triceps": 0.8,
+      "pronator": 0.1,
+      "flexors": 0.1
      }
     },
     {
-     "label": "内旋转正",
-     "d": "小臂在触球前一瞬快速内旋，拍面由侧立转正——听“啪”一声",
-     "dur": 500,
+     "label": "旋前爆发",
+     "d": "旋前圆肌收缩：桡骨绕尺骨翻转、拍面转正——清脆击球声的来源",
+     "dur": 550,
      "hit": true,
      "spin": "in",
-     "focus": [
-      "foreArm",
-      "racket"
-     ],
      "pose": {
-      "rootX": 0,
-      "torso": -92,
-      "upperArm": -68,
-      "foreArm": -110,
-      "racket": -115,
-      "face": 0.95,
-      "frontThigh": 112,
-      "frontShin": 95,
-      "frontFoot": 183,
-      "backThigh": 84,
-      "backShin": 90,
-      "backFoot": 8,
-      "otherUpper": 128,
-      "otherFore": 108
+      "upperArm": -70,
+      "foreArm": -95,
+      "pron": 1,
+      "triceps": 0.35,
+      "pronator": 1,
+      "flexors": 0.4
      }
     },
     {
-     "label": "捏紧制动",
-     "d": "手指捏死拍柄瞬间制动，力量全部交给球头，随即回松",
-     "dur": 750,
-     "focus": [
-      "racket"
-     ],
+     "label": "捏紧 · 制动",
+     "d": "屈肌群收缩、手指捏死拍柄，力量交给球头后立刻回松",
+     "dur": 800,
      "pose": {
-      "rootX": 0,
-      "torso": -90,
-      "upperArm": -75,
-      "foreArm": -125,
-      "racket": -150,
-      "face": 0.7,
-      "frontThigh": 112,
-      "frontShin": 95,
-      "frontFoot": 183,
-      "backThigh": 84,
-      "backShin": 90,
-      "backFoot": 8,
-      "otherUpper": 128,
-      "otherFore": 108
+      "upperArm": -74,
+      "foreArm": -118,
+      "pron": 0.85,
+      "triceps": 0.15,
+      "pronator": 0.3,
+      "flexors": 1
      }
     }
    ]
@@ -1371,135 +1263,66 @@ window.BADMINTON_MOVES = [
   ],
   "video": "",
   "anim": {
-   "type": "figure",
-   "note": "与高远球同一条发力链，差别在：击球点更靠前、重心整体压进去、随挥更向下",
+   "type": "anatomy",
+   "show": [
+    "triceps",
+    "pronator",
+    "flexors"
+   ],
+   "note": "与高远球同一条臂部链条，差别在收缩速度更快、旋前更彻底、屈腕更充分",
    "frames": [
     {
-     "label": "侧身后坐",
-     "d": "重心压后脚拉满弓；杀球的击球点会比高远球更靠前",
-     "dur": 900,
-     "focus": [
-      "torso"
-     ],
+     "label": "满弓预载",
+     "d": "屈肘后引，伸肌被预拉长储存弹性势能",
+     "dur": 850,
      "pose": {
-      "rootX": 30,
-      "rootY": 4,
-      "torso": -74,
-      "upperArm": -35,
-      "foreArm": -98,
-      "racket": -48,
-      "face": 0.1,
-      "frontThigh": 124,
-      "frontShin": 102,
-      "frontFoot": 186,
-      "backThigh": 74,
-      "backShin": 86,
-      "backFoot": 10,
-      "otherUpper": -155,
-      "otherFore": -165
+      "upperArm": -40,
+      "foreArm": -95,
+      "pron": 0.12,
+      "triceps": 0.25,
+      "pronator": 0.1,
+      "flexors": 0.1
      }
     },
     {
-     "label": "蹬转起跳",
-     "d": "蹬地起跳、转髋，身体在空中成反弓——倒拍完成",
-     "dur": 750,
-     "focus": [
-      "legs",
-      "foreArm"
-     ],
-     "pose": {
-      "rootX": 4,
-      "rootY": -22,
-      "torso": -88,
-      "upperArm": -25,
-      "foreArm": -25,
-      "racket": 60,
-      "face": 0.12,
-      "frontThigh": 128,
-      "frontShin": 118,
-      "frontFoot": 200,
-      "backThigh": 96,
-      "backShin": 118,
-      "backFoot": 85,
-      "otherUpper": -185,
-      "otherFore": -190
-     }
-    },
-    {
-     "label": "空中鞭打",
-     "d": "肘领先向前上，胸腹收缩带动挥臂",
+     "label": "爆发伸肘",
+     "d": "肱三头肌全力收缩，比高远球更快更彻底",
      "dur": 550,
-     "focus": [
-      "upperArm",
-      "foreArm"
-     ],
      "pose": {
-      "rootX": -8,
-      "rootY": -26,
-      "torso": -98,
-      "upperArm": -80,
-      "foreArm": -5,
-      "racket": 75,
-      "face": 0.2,
-      "frontThigh": 126,
-      "frontShin": 112,
-      "frontFoot": 196,
-      "backThigh": 94,
-      "backShin": 112,
-      "backFoot": 82,
-      "otherUpper": -215,
-      "otherFore": -240
+      "upperArm": -76,
+      "foreArm": -18,
+      "pron": 0.15,
+      "triceps": 1,
+      "pronator": 0.15,
+      "flexors": 0.15
      }
     },
     {
-     "label": "前上方砸下",
-     "d": "击球点在前上方，内旋+重心一起压进球——拍面前倾包住球",
-     "dur": 420,
+     "label": "全旋前下压",
+     "d": "完全旋前＋屈腕，拍面前倾把球包住压下",
+     "dur": 480,
      "hit": true,
      "spin": "in",
-     "focus": [
-      "foreArm",
-      "racket"
-     ],
      "pose": {
-      "rootX": -16,
-      "rootY": -20,
-      "torso": -104,
-      "upperArm": -55,
-      "foreArm": -130,
-      "racket": -140,
-      "face": 1.0,
-      "frontThigh": 122,
-      "frontShin": 104,
-      "frontFoot": 190,
-      "backThigh": 88,
-      "backShin": 104,
-      "backFoot": 75,
-      "otherUpper": -232,
-      "otherFore": -258
+      "upperArm": -58,
+      "foreArm": -108,
+      "pron": 1,
+      "triceps": 0.5,
+      "pronator": 1,
+      "flexors": 0.6
      }
     },
     {
-     "label": "落地随挥",
-     "d": "左脚先落地缓冲，拍收向体侧——立刻回收重心衔接上网",
-     "dur": 850,
-     "focus": [],
+     "label": "随挥卸力",
+     "d": "顺势收臂卸力，保护肘部与肩袖",
+     "dur": 800,
      "pose": {
-      "rootX": -26,
-      "rootY": 8,
-      "torso": -100,
-      "upperArm": -170,
-      "foreArm": -195,
-      "racket": -210,
-      "face": 0.5,
-      "frontThigh": 122,
-      "frontShin": 98,
-      "frontFoot": 184,
-      "backThigh": 88,
-      "backShin": 100,
-      "backFoot": 30,
-      "otherUpper": -244,
-      "otherFore": -268
+      "upperArm": -98,
+      "foreArm": -142,
+      "pron": 0.8,
+      "triceps": 0.15,
+      "pronator": 0.25,
+      "flexors": 0.4
      }
     }
    ]
@@ -1562,108 +1385,72 @@ window.BADMINTON_MOVES = [
   ],
   "video": "",
   "anim": {
-   "type": "figure",
-   "note": "背对球网（网在左），从右侧观察；红色箭头 = 外旋方向，与正手内旋互为镜像",
+   "type": "anatomy",
+   "show": [
+    "triceps",
+    "supinator",
+    "biceps"
+   ],
+   "note": "反手＝外旋：桡骨从交叉位转回与尺骨平行，由旋后肌＋肱二头肌驱动——与正手内旋互为镜像",
    "frames": [
     {
-     "label": "换握 · 转肩背网",
-     "d": "拇指顶在拍柄宽面上松握；右肩转向球网，看球过肩",
+     "label": "反手预备 · 旋前位",
+     "d": "反手引拍时前臂处于旋前位（桡骨交叉），拇指顶在拍柄宽面",
      "dur": 950,
-     "focus": [],
      "pose": {
-      "rootX": 6,
-      "torso": -92,
-      "upperArm": 120,
-      "foreArm": 185,
-      "racket": 235,
-      "face": 0.1,
-      "frontThigh": 125,
-      "frontShin": 90,
-      "frontFoot": 196,
-      "backThigh": 80,
-      "backShin": 62,
-      "backFoot": 14,
-      "otherUpper": 62,
-      "otherFore": 80,
-      "rootY": 26
+      "upperArm": -148,
+      "foreArm": 55,
+      "pron": 0.9,
+      "triceps": 0.15,
+      "supinator": 0.05,
+      "biceps": 0.15
      }
     },
     {
      "label": "肘部引导",
-     "d": "肘尖抬起、先指向击球点——肘是反手的方向盘",
-     "dur": 800,
-     "focus": [
-      "upperArm"
-     ],
+     "d": "肘尖先指向击球点，肱三头肌伸肘",
+     "dur": 750,
      "pose": {
-      "rootX": -4,
-      "torso": -96,
-      "upperArm": -160,
-      "foreArm": 60,
-      "racket": 100,
-      "face": 0.12,
-      "frontThigh": 125,
-      "frontShin": 90,
-      "frontFoot": 196,
-      "backThigh": 80,
-      "backShin": 62,
-      "backFoot": 14,
-      "otherUpper": 66,
-      "otherFore": 84,
-      "rootY": 26
+      "upperArm": -156,
+      "foreArm": -15,
+      "pron": 0.85,
+      "triceps": 0.6,
+      "supinator": 0.1,
+      "biceps": 0.2
      }
     },
     {
-     "label": "外旋击球",
-     "d": "小臂外旋展开+拇指瞬间顶压——注意与正手内旋方向相反",
-     "dur": 500,
+     "label": "外旋展开",
+     "d": "旋后肌＋肱二头肌协同：桡骨转回与尺骨平行",
+     "dur": 550,
      "hit": true,
      "spin": "out",
-     "focus": [
-      "foreArm",
-      "racket"
-     ],
      "pose": {
-      "rootX": -10,
-      "torso": -98,
-      "upperArm": -155,
-      "foreArm": -135,
-      "racket": -130,
-      "face": 0.9,
-      "frontThigh": 125,
-      "frontShin": 90,
-      "frontFoot": 196,
-      "backThigh": 80,
-      "backShin": 62,
-      "backFoot": 14,
-      "otherUpper": 70,
-      "otherFore": 88,
-      "rootY": 26
+      "upperArm": -150,
+      "foreArm": -118,
+      "pron": 0.08,
+      "triceps": 0.4,
+      "supinator": 1,
+      "biceps": 0.8
      }
     },
     {
-     "label": "制动回收",
-     "d": "高远过渡打对角最安全；出手后顺势回收准备回位",
+     "label": "拇指顶压 · 制动",
+     "d": "拇指顶压完成末端发力，出球后前臂回松",
      "dur": 800,
-     "focus": [],
      "pose": {
-      "rootX": -2,
-      "torso": -94,
-      "upperArm": -150,
-      "foreArm": -110,
-      "racket": -80,
-      "face": 0.4,
-      "frontThigh": 125,
-      "frontShin": 90,
-      "frontFoot": 196,
-      "backThigh": 80,
-      "backShin": 62,
-      "backFoot": 14,
-      "otherUpper": 66,
-      "otherFore": 84,
-      "rootY": 26
+      "upperArm": -148,
+      "foreArm": -132,
+      "pron": 0.15,
+      "triceps": 0.2,
+      "supinator": 0.3,
+      "biceps": 0.35
      }
     }
+   ],
+   "origin": [
+    320,
+    360
    ]
   },
   "anim2": {
