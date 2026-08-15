@@ -1,41 +1,44 @@
-# 🏸 羽球动作库 · Badminton Moves Dataset
+# 🏸 Badminton Moves Dataset
 
-羽毛球动作解析数据集 + 交互查看器，结构参考 [exercises-dataset](https://github.com/hasaneyldrm/exercises-dataset) 的「JSON 数据层 + 每动作动画 + index.html 浏览器」模式。
+**English** | [简体中文](README.zh-CN.md)
 
-与健身数据集的关键差异：羽毛球没有可用的免版权动图库，所以**动画由自绘 SVG 引擎按数据规格实时渲染**——无媒体文件、无版权问题、完全离线可用。
+A structured badminton movement & technique dataset with an interactive viewer. The layout follows the "JSON data layer + per-item animation + `index.html` browser" pattern of [exercises-dataset](https://github.com/hasaneyldrm/exercises-dataset).
 
-## 内容
+One key difference from the fitness dataset: there is no license-free GIF library for badminton, so **every animation here is rendered in real time by self-drawn SVG engines, driven entirely by the data specs** — no media files, no copyright issues, fully offline.
 
-当前 **32 个动作**，六个分类：
+## What's inside
 
-| 分类 | 前缀 | 数量 | 动画类型 |
+**32 moves** across **6 categories**:
+
+| Category | Prefix | Count | Animation |
 |---|---|---|---|
-| 步伐 | `fw-` | 7 | 球场俯视：移动路径 / 步子类型 / 来球轨迹 |
-| 双打 | `db-` | 6 | **俯视双人同步动画**（实心=你、空心=搭档），多拍球路还原完整回合 |
-| 手法 | `sk-` | 8 | **弧线视图**（侧视全场球路对比：主示范实线 / 变化虚线 / 反面示范红线）；搓放另配侧视姿态，勾对角用俯视 |
-| 启动与重心 | `st-` | 4 | 时机轴（垫步）、俯视（回收/变向）、站位覆盖 |
-| 发力技巧 | `pw-` | 4 | **侧视简笔人姿态动画**（大臂/小臂/拍面骨架关键帧，内旋外旋、发力主角高亮、拍头轨迹）+ 发力链时序双标签 |
-| 防守 | `df-` | 3 | 俯视 + 来球轨迹 |
+| Footwork | `fw-` | 7 | Top-down court view: movement paths, step types, incoming shuttle |
+| Strokes | `sk-` | 8 | **Trajectory view** — side-view full-court flight arcs (solid = model shot, dashed = variation, red = anti-pattern); net play adds a stick-figure tab, cross-court net uses top-down |
+| Doubles | `db-` | 6 | **Two-player synchronized top-down animation** (solid = you, hollow = partner) with multi-shot rallies |
+| Split step & balance | `st-` | 4 | Timing axis (split step), top-down (recovery / direction change), stance coverage |
+| Power generation | `pw-` | 4 | **Side-view stick figure** — upper-arm / forearm / racket-face keyframes with pronation–supination arrows, active-segment highlighting and racket-tip trail, plus a kinetic-chain tab |
+| Defense | `df-` | 3 | Top-down + incoming smash lines |
 
-每条记录包含：中英文名、分类、难度、概述、要点、常见错误、训练方法、相关动作、动画规格、预留视频链接字段。
+Every record contains: bilingual name, category, difficulty, summary, key points, common mistakes, drills, related-move links, an animation spec, and a reserved `video` field for future real-footage links.
 
-## 文件结构
+## File structure
 
 ```
 badminton-moves/
-├── index.html            # 查看器：分类筛选 + 搜索 + 四种动画引擎
+├── index.html            # Viewer: category filter + search + six animation engines
 ├── data/
-│   ├── moves.json        # 数据源（真源，供程序使用）
-│   ├── moves.js          # 由 moves.json 生成，供 index.html 以 file:// 直接打开
-│   └── moves.schema.json # JSON Schema
-└── README.md
+│   ├── moves.json        # Source of truth (for programmatic use)
+│   ├── moves.js          # Generated from moves.json, lets index.html run from file://
+│   └── moves.schema.json # JSON Schema for the data layer
+├── README.md             # This file
+└── README.zh-CN.md       # Chinese version
 ```
 
-## 使用
+## Usage
 
-直接双击打开 `index.html` 即可（数据经 `moves.js` 加载，不受 file:// CORS 限制）。
+Just open `index.html` in a browser — data is loaded via `moves.js`, so it works from `file://` without a local server.
 
-修改数据后重新生成 `moves.js`：
+After editing the data, regenerate `moves.js`:
 
 ```bash
 python3 -c "
@@ -44,21 +47,29 @@ d=json.load(open('data/moves.json'))
 open('data/moves.js','w').write('window.BADMINTON_MOVES = '+json.dumps(d,ensure_ascii=False,indent=1)+';')"
 ```
 
-## 动画坐标系
+## Coordinate systems
 
-单打半场俯视，单位厘米：`x` 0–610（面向球网从左到右），`y` 0 = 球网，`y` 670 = 底线，`y < 0` = 对手半场（压缩条，用作来球起点）。发球线 y=198，双打后发球线 y=594，单打边线 x=46 / x=564，中线 x=305。
+**Top-down half court** (footwork / doubles / stance), in centimetres: `x` 0–610 left→right facing the net, `y` 0 = net, `y` 670 = baseline, `y < 0` = a compressed strip of the opponent's side used as shuttle origins. Short service line y=198, doubles long service line y=594, singles sidelines x=46 / x=564, centre line x=305.
 
-## 扩展一个动作
+**Side-view full court** (trajectory): `x` 0–1340 cm along the court length with the net at 670 (own baseline 30, opponent baseline 1310, service lines 472/868); heights are cm above ground. Arcs crossing the net should clear 155 cm (net height) at x=670 — the dataset's arcs are validated against this.
 
-在 `data/moves.json` 追加一条记录（对照 `moves.schema.json`），选一种动画类型：
+**Stick figure** (side view): joint angles in degrees, screen space — 0° = right (player's back side), 90° = down, 180° = left (net side), −90° = up. Keep consecutive keyframe angles numerically continuous (use values beyond ±180 instead of wrapping) so linear interpolation sweeps the correct arc.
 
-- `footwork`：给出 `phases`（位置 + 步子类型 + 标签 + 时长），可选 `shuttle` 来球（单个对象或数组，多拍回合按 `at` 阶段依次飞行）；可选 `phases2` 加双打搭档（空心标记，与 `phases` 等长同步移动）
-- `chain`：给出发力链 `nodes`（标题 + 说明，`hit:true` 标记触球环节）
-- `timing`：给出时间轴 `events`（0–1 时刻 + 标签，`hit:true` 为对手击球）
-- `stance`：给出 `player` 位置和 `zones` 覆盖区
-- `figure`：侧视简笔人关键帧——每帧一组关节角度（大臂/小臂/拍/躯干/双腿），`focus` 高亮当前发力主角，`spin` 显示内旋/外旋箭头，`hit` 在帧末触发击球闪光；角度约定与连续性规则见 schema 中 `animFigure` 的描述
-- `trajectory`：侧视全场球路弧线——每条弧线给 `from/apex/to`（[x, 高度cm]，网在 x=670），`kind` 区分主示范/变化/反面示范；过网弧线应在 x=670 处高于 155cm（网高）
+## Adding a move
 
-一条记录还可以加可选的 `anim2`（任意类型），查看器会显示双动画切换标签（发力类动作即"侧视姿态 / 发力链"双视角）。
+Append a record to `data/moves.json` (validate against `moves.schema.json`) and pick an animation type:
 
-重新生成 `moves.js` 即可，查看器无需改动。
+- `footwork` — `phases` (position + step kind + label + duration); optional `shuttle` (a single shot or an array for multi-shot rallies, each firing at its phase index); optional `phases2` adds a doubles partner (hollow marker, same length as `phases`, synchronized)
+- `chain` — kinetic-chain `nodes` (title + caption; `hit: true` marks the contact link)
+- `timing` — timeline `events` (0–1 instants + labels; `hit: true` = opponent's contact)
+- `stance` — `player` position and `zones` coverage rectangles
+- `figure` — side-view stick-figure keyframes: per-frame joint angles (upper arm / forearm / racket / torso / legs), `focus` highlights the active segment, `spin` shows a pronation (`in`) or supination (`out`) arrow, `hit` flashes at the racket tip at the end of the frame
+- `trajectory` — full-court flight arcs, each defined by `from` / `apex` / `to` (`[x, height-cm]`, net at x=670); `kind` distinguishes model / variation / anti-pattern arcs
+
+A record may also carry an optional `anim2` (any type) — the viewer shows a tab toggle (e.g. power moves pair a stick-figure view with a kinetic-chain view).
+
+Regenerate `moves.js` and you're done — the viewer needs no code changes.
+
+## License
+
+[MIT](LICENSE). Move content and animation specs are original work; the repository layout is inspired by [exercises-dataset](https://github.com/hasaneyldrm/exercises-dataset).
